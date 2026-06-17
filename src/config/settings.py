@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 
 # Load all variables from the .env file into the environment.
-load_dotenv()
+load_dotenv(override=True)
 
 # --- Load environment variables ---
 
