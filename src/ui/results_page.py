@@ -182,6 +182,26 @@ def render_results_page() -> None:
     else:
         st.caption("No coach notes provided.")
 
+    # Section 7: AI Coach Explanation
+    section_header("AI Coach Explanation", "Get a personalized breakdown of your plan from our AI assistant.")
+    
+    if st.session_state.ai_explanation:
+        st.markdown(
+            f"""
+            <div class="fitness-card">
+                {st.session_state.ai_explanation}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        if st.button("🤖 Generate AI Explanation", type="secondary"):
+            with st.spinner("Generating explanation..."):
+                from src.agents.fitness_agent import generate_ai_plan_explanation
+                explanation = generate_ai_plan_explanation(plan)
+                st.session_state.ai_explanation = explanation
+                st.rerun()
+
     st.markdown("<br>", unsafe_allow_html=True)
     show_medical_disclaimer()
     st.markdown("---")
@@ -199,4 +219,5 @@ def render_results_page() -> None:
             st.session_state.profile = None
             st.session_state.results = []
             st.session_state.image_cache = {}
+            st.session_state.ai_explanation = None
             st.rerun()

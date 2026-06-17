@@ -53,6 +53,15 @@ if "error" not in st.session_state:
 if "last_generated_plan" not in st.session_state:
     st.session_state.last_generated_plan = None
 
+if "ai_explanation" not in st.session_state:
+    st.session_state.ai_explanation = None
+
+if "saved_plans" not in st.session_state:
+    st.session_state.saved_plans = []
+
+if "selected_saved_plan" not in st.session_state:
+    st.session_state.selected_saved_plan = None
+
 # --- Stage-based routing ---
 from src.ui.login import render_auth_page
 from src.ui.view_user_stats import render_dashboard_page

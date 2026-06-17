@@ -113,6 +113,7 @@ def render_plan_page() -> None:
             try:
                 plan = generate_fitness_plan(profile)
                 st.session_state.results = plan
+                st.session_state.ai_explanation = None
                 st.session_state.stage = "results"
                 st.rerun()
             except Exception as e:
