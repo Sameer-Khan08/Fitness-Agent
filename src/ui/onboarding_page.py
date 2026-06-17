@@ -1,31 +1,73 @@
 """
 onboarding_page.py
 ------------------
-Renders the onboarding form where users enter their fitness profile.
-Collected data is stored in st.session_state.profile and the app
-moves to the "plan" stage on submission.
+Renders the redesign-based onboarding form where users enter their athlete profile.
+Uses columns, clean sections, custom CSS styling, and dashboard cards.
 """
 
 import streamlit as st
+from src.ui.components import inject_custom_css, hero_section
 
 
 def render_onboarding_page() -> None:
     """
-    Display the onboarding page with a fitness profile form.
-    On submission, saves the profile to session state and routes
-    the user to the plan stage.
+    Display the redesigned onboarding page with a fitness/athletic profile form.
+    On submission, saves the profile to session state and routes the user to the plan stage.
     """
-    st.title("🏋️ TrainWise AI")
-    st.subheader("AI fitness and athletic performance coach.")
-    st.markdown("---")
-    st.markdown("### Tell us about yourself")
-    st.caption("Fill in the form below so we can tailor your training plan.")
+    # 1. Custom CSS
+    inject_custom_css()
 
+    # 2. Hero Section
+    hero_section(
+        title="TrainWise AI",
+        subtitle="AI-powered fitness and athletic performance planning with injury-aware reality checks."
+    )
+
+    # 3. How it Works cards
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(
+            """
+            <div class="metric-card" style="height: 130px;">
+                <span style="font-size: 1.6rem;">🎯</span>
+                <h5 style="margin: 6px 0 4px 0; color: white;">1. Tell us your goal</h5>
+                <p style="font-size: 12px; color: #8C96A8; margin: 0;">Specify what you want to achieve or improve.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with col2:
+        st.markdown(
+            """
+            <div class="metric-card" style="height: 130px;">
+                <span style="font-size: 1.6rem;">🩹</span>
+                <h5 style="margin: 6px 0 4px 0; color: white;">2. Add Sport & Pain</h5>
+                <p style="font-size: 12px; color: #8C96A8; margin: 0;">Add athletic and pain context for screen check.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with col3:
+        st.markdown(
+            """
+            <div class="metric-card" style="height: 130px;">
+                <span style="font-size: 1.6rem;">⚡</span>
+                <h5 style="margin: 6px 0 4px 0; color: white;">3. Get your plan</h5>
+                <p style="font-size: 12px; color: #8C96A8; margin: 0;">Generate a custom, injury-aware coach routine.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # 4. Form
     with st.form(key="onboarding_form"):
-
-        col1, col2 = st.columns(2)
-
-        with col1:
+        
+        # --- Section 1: Body Profile ---
+        st.markdown("### 👤 Body Profile")
+        col_age, col_gen = st.columns(2)
+        with col_age:
             age = st.number_input(
                 "Age (years)",
                 min_value=12,
@@ -33,78 +75,119 @@ def render_onboarding_page() -> None:
                 value=25,
                 step=1,
             )
-            height = st.number_input(
-                "Height (cm)",
-                min_value=100,
-                max_value=250,
-                value=170,
-                step=1,
-            )
+        with col_gen:
             gender = st.selectbox(
                 "Gender",
-                options=["Male", "Female", "Non-binary", "Prefer not to say"],
+                options=["Male", "Female", "Other", "Prefer not to say"],
             )
 
-        with col2:
-            weight = st.number_input(
-                "Weight (kg)",
-                min_value=30,
-                max_value=300,
-                value=70,
-                step=1,
-            )
-            fitness_level = st.selectbox(
-                "Current fitness level",
-                options=["Beginner", "Intermediate", "Advanced", "Athlete"],
-            )
-            training_days = st.slider(
-                "Training days per week",
-                min_value=1,
-                max_value=7,
-                value=3,
-            )
+        col_h, col_w = st.columns(2)
+        with col_h:
+            height = st.text_input("Height", value="170", placeholder="e.g. 170 or 5'9\"")
+        with col_w:
+            weight = st.text_input("Weight", value="70", placeholder="e.g. 70 or 154 lbs")
 
+        st.markdown("<hr style='margin:20px 0; opacity:0.1;'>", unsafe_allow_html=True)
+
+        # --- Section 2: Training Goal ---
+        st.markdown("### 🎯 Training Goal")
         main_goal = st.selectbox(
-            "Main goal",
+            "Main Goal",
             options=[
-                "Weight loss",
-                "General fitness",
-                "Muscle gain",
-                "Athletic development",
-                "Sport-specific training",
-                "Injury rehabilitation",
-                "Improve endurance",
+                "Weight Loss",
+                "Muscle Gain",
+                "General Fitness",
+                "Athletic Performance",
+                "Sport-Specific Performance",
+                "Strength",
+                "Endurance",
+                "Mobility",
             ],
         )
 
-        sport = st.text_input(
-            "Sport (if applicable)",
-            placeholder="e.g. Football, Swimming, Tennis — leave blank if not applicable",
+        fitness_level = st.selectbox(
+            "Fitness Level",
+            options=["Beginner", "Intermediate", "Advanced"],
+        )
+
+        # Retain the primary problem field from specificity overhaul as it drives AI diagnosis logic
+        st.markdown("##### 🔍 Describe your exact situation (Primary Problem)")
+        st.caption("Tell us exactly what you want to solve. Be as specific as possible.")
+        primary_problem = st.text_area(
+            "Primary problem or goal description",
+            placeholder=(
+                "Examples:\n"
+                "• I've had left knee pain for 6 months. I can't squat without pain and I play football on weekends.\n"
+                "• I've been training for 2 years but my bench press is stuck at 80kg and I can't seem to break through.\n"
+                "• I run 3x a week but my calves cramp badly after 15 mins. I want to run a 5k in under 25 minutes."
+            ),
+            height=100,
+            label_visibility="collapsed"
+        )
+
+        st.markdown("<hr style='margin:20px 0; opacity:0.1;'>", unsafe_allow_html=True)
+
+        # --- Section 3: Sport & Schedule ---
+        st.markdown("### 🏃 Sport & Schedule")
+        sport = st.selectbox(
+            "Sport Focus",
+            options=[
+                "None",
+                "Gym Only",
+                "Football",
+                "Soccer",
+                "Basketball",
+                "Cricket",
+                "Tennis",
+                "Badminton",
+                "Running",
+                "Other",
+            ],
+        )
+
+        training_days = st.slider(
+            "Training days per week",
+            min_value=2,
+            max_value=7,
+            value=3,
         )
 
         session_duration = st.selectbox(
             "Preferred session duration",
-            options=["30 minutes", "45 minutes", "60 minutes", "75 minutes", "90+ minutes"],
+            options=["30 minutes", "45 minutes", "60 minutes", "75 minutes", "90 minutes"],
+            index=2
         )
 
+        st.markdown("<hr style='margin:20px 0; opacity:0.1;'>", unsafe_allow_html=True)
+
+        # --- Section 4: Injury Reality Check ---
+        st.markdown("### 🛡️ Injury Reality Check")
         injuries = st.text_area(
-            "Injuries or pain areas",
-            placeholder="e.g. Left knee pain, lower back stiffness — leave blank if none",
+            "Describe any injuries or pain areas",
+            placeholder="Example: groin pain during sprinting, knee pain when jumping, lower back pain during deadlifts",
             height=80,
         )
 
         pain_rating = st.slider(
-            "Current pain rating (0 = no pain, 10 = severe)",
+            "Current pain rating",
             min_value=0,
             max_value=10,
             value=0,
+            help="0 = no pain, 10 = worst pain imaginable"
         )
+        st.caption("ℹ️ 0 = no pain, 10 = worst pain imaginable")
 
-        submitted = st.form_submit_button("Build My Plan →", use_container_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        submitted = st.form_submit_button("Build My Plan", width="stretch", type="primary")
 
     if submitted:
-        # Save the collected profile into session state.
+        # Fallback to general description if primary problem is empty
+        prob_text = primary_problem.strip()
+        if not prob_text:
+            prob_text = f"Goal: {main_goal}. Sport: {sport}. Fitness level: {fitness_level}."
+
         st.session_state.profile = {
+            "primary_problem": prob_text,
             "age": age,
             "gender": gender,
             "height_cm": height,
@@ -117,6 +200,5 @@ def render_onboarding_page() -> None:
             "injuries": injuries,
             "pain_rating": pain_rating,
         }
-        # Move to the plan stage.
         st.session_state.stage = "plan"
         st.rerun()
