@@ -21,13 +21,13 @@ from together import Together
 from src.config.settings import TOGETHER_API_KEY
 
 # Primary model — as specified in project requirements.
-IMAGE_MODEL_PRIMARY = "openai/gpt-image-1.5"
+IMAGE_MODEL_PRIMARY = "openai/gpt-image-1.555"
 
 # Fallback model — fast, serverless, always available.
 IMAGE_MODEL_FALLBACK = "black-forest-labs/FLUX.1-schnell"
 
 # Request timeout for fetching hosted image URLs (seconds).
-_URL_FETCH_TIMEOUT = 30
+_URL_FETCH_TIMEOUT = 15
 
 
 def build_exercise_image_prompt(exercise_name: str) -> str:
@@ -47,7 +47,8 @@ def build_exercise_image_prompt(exercise_name: str) -> str:
         "Clean modern gym setting with neutral background and soft professional lighting. "
         "Full body visible, clear movement demonstration showing correct posture and alignment. "
         "High quality, photorealistic, fitness magazine style. "
-        "No text, no labels, no watermarks, no overlays in the image."
+        "Atleast one cycle of the movement should be visible. It should be a step-by-step infographic showing the steps of the exercise."
+        "No text, no watermarks, no overlays in the image."
     )
     return prompt
 
@@ -129,7 +130,7 @@ def generate_exercise_image(exercise_name: str) -> bytes:
         response = client.images.generate(
             prompt=prompt,
             model=IMAGE_MODEL_FALLBACK,
-            width=768,
+            width=512,
             height=512,
             steps=4,
             n=1,
