@@ -186,19 +186,28 @@ def render_onboarding_page() -> None:
         if not prob_text:
             prob_text = f"Goal: {main_goal}. Sport: {sport}. Fitness level: {fitness_level}."
 
-        st.session_state.profile = {
+        profile_data = {
             "primary_problem": prob_text,
             "age": age,
             "gender": gender,
             "height_cm": height,
             "weight_kg": weight,
             "main_goal": main_goal,
+            "goal": main_goal,  # alias for DB
             "sport": sport,
+            "main_sport": sport,  # alias for DB
             "fitness_level": fitness_level,
             "training_days_per_week": training_days,
             "session_duration": session_duration,
             "injuries": injuries,
             "pain_rating": pain_rating,
         }
+        st.session_state.profile = profile_data
+        
+        # Save to DB if logged in
+        if st.session_state.get('user_id'):
+            from database.save_new_user import save_user_profile_data
+            save_user_profile_data(st.session_state.user_id, profile_data)
+            
         st.session_state.stage = "plan"
         st.rerun()

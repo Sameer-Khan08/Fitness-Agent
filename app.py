@@ -26,8 +26,14 @@ st.set_page_config(
 # --- Session state initialisation ---
 # These keys are set once on first load and preserved across reruns.
 
+if "user_id" not in st.session_state:
+    st.session_state.user_id = None
+
+if "username" not in st.session_state:
+    st.session_state.username = None
+
 if "stage" not in st.session_state:
-    st.session_state.stage = "onboarding"
+    st.session_state.stage = "auth"
 
 if "profile" not in st.session_state:
     st.session_state.profile = None
@@ -42,10 +48,18 @@ if "last_generated_plan" not in st.session_state:
     st.session_state.last_generated_plan = None
 
 # --- Stage-based routing ---
+from src.ui.login import render_auth_page
+from src.ui.view_user_stats import render_dashboard_page
 
 current_stage = st.session_state.stage
 
-if current_stage == "onboarding":
+if current_stage == "auth":
+    render_auth_page()
+
+elif current_stage == "dashboard":
+    render_dashboard_page()
+
+elif current_stage == "onboarding":
     render_onboarding_page()
 
 elif current_stage == "plan":
@@ -55,6 +69,6 @@ elif current_stage == "results":
     render_results_page()
 
 else:
-    # Unknown stage — reset to onboarding as a safe fallback.
-    st.session_state.stage = "onboarding"
+    # Unknown stage — reset to auth as a safe fallback.
+    st.session_state.stage = "auth"
     st.rerun()
