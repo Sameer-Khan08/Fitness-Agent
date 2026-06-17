@@ -1,0 +1,1 @@
+-- this contains the current schema of the database. If it is empty then it means the database schema is not yet present.
