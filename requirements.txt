@@ -7,3 +7,4 @@ pillow
 together
 watchdog
 supabase
+psycopg2-binary

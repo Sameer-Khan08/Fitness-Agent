@@ -1,11 +1,9 @@
-from database import get_supabase_client
+from database import get_db
 
 def get_user_by_username(username: str) -> dict | None:
-    supabase = get_supabase_client()
-    response = supabase.table("users").select("*").eq("username", username).execute()
-    return response.data[0] if response.data else None
+    db = get_db()
+    return db.fetchone("SELECT * FROM users WHERE username = %s", (username,))
 
 def get_user_profile(user_id: int) -> dict | None:
-    supabase = get_supabase_client()
-    response = supabase.table("user_profiles").select("*").eq("user_id", user_id).execute()
-    return response.data[0] if response.data else None
+    db = get_db()
+    return db.fetchone("SELECT * FROM user_profiles WHERE user_id = %s", (user_id,))

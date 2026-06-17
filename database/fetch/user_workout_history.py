@@ -1,16 +1,12 @@
-from database import get_supabase_client
+from database import get_db
 
 def get_user_workout_history(user_id: int) -> list[dict]:
-    supabase = get_supabase_client()
-    response = supabase.table("workout_history").select("*").eq("user_id", user_id).order("date", desc=True).execute()
-    return response.data
+    db = get_db()
+    return db.fetchall("SELECT * FROM workout_history WHERE user_id = %s ORDER BY date DESC", (user_id,))
 
 def add_workout_history(user_id: int, date: str, duration_minutes: int, calories_burned: int, notes: str):
-    supabase = get_supabase_client()
-    supabase.table("workout_history").insert({
-        "user_id": user_id,
-        "date": date,
-        "duration_minutes": duration_minutes,
-        "calories_burned": calories_burned,
-        "notes": notes
-    }).execute()
+    db = get_db()
+    db.execute("""
+        INSERT INTO workout_history (user_id, date, duration_minutes, calories_burned, notes)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (user_id, date, duration_minutes, calories_burned, notes))

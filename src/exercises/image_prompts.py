@@ -49,7 +49,7 @@ def build_exercise_image_prompt(exercise_name: str) -> str:
         # "High quality, photorealistic, fitness magazine style. "
         # "Atleast one cycle of the movement should be visible. It should be a step-by-step infographic showing the steps of the exercise."
         # "No text, no watermarks, no overlays in the image."
-        '''
+        """
 Create one photorealistic fitness exercise instruction image for **{exercise_name}**.
 
 The output must be **one single image** divided into **4 clearly separated blocks/panels** in a clean **2x2 grid layout**.
@@ -118,7 +118,7 @@ The labels should feel like a professional exercise instruction card.
 
 The image should look like a **professional exercise demo card** that clearly teaches the movement step by step and shows proper form in a beginner-friendly way.
 
-        '''
+        """
     )
     return prompt
 

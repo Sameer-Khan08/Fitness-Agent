@@ -1,6 +1,6 @@
-from database import get_supabase_client
+from database import get_db
 
 def get_user_goals(user_id: int) -> list[str]:
-    supabase = get_supabase_client()
-    response = supabase.table("user_goals").select("goal").eq("user_id", user_id).execute()
-    return [row['goal'] for row in response.data]
+    db = get_db()
+    rows = db.fetchall("SELECT goal FROM user_goals WHERE user_id = %s", (user_id,))
+    return [row['goal'] for row in rows]

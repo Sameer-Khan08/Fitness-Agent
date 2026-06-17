@@ -1,53 +1,59 @@
-from database import get_supabase_client
+from database import get_db
 
 def create_user(username: str) -> int:
     """Create a new user and return their ID. Returns existing ID if user exists."""
-    supabase = get_supabase_client()
+    db = get_db()
     
     # Try to fetch first
-    response = supabase.table("users").select("id").eq("username", username).execute()
-    if response.data:
-        return response.data[0]['id']
+    row = db.fetchone("SELECT id FROM users WHERE username = %s", (username,))
+    if row:
+        return row['id']
         
-    # Insert new user
-    response = supabase.table("users").insert({"username": username}).execute()
-    return response.data[0]['id']
+    # Insert new user returning ID
+    return db.execute_returning_id("INSERT INTO users (username) VALUES (%s) RETURNING id", (username,))
 
 def save_user_profile_data(user_id: int, profile_data: dict):
     """Save the full profile dictionary to the database for the given user_id."""
-    supabase = get_supabase_client()
+    db = get_db()
     
     # 1. Save or update user_profiles
-    supabase.table("user_profiles").upsert({
-        "user_id": user_id,
-        "age": profile_data.get('age'),
-        "gender": profile_data.get('gender'),
-        "fitness_level": profile_data.get('fitness_level'),
-        "experience_years": profile_data.get('experience_years'),
-        "medical_clearance": profile_data.get('medical_clearance'),
-        "red_flags_present": profile_data.get('red_flags_present'),
-        "training_status": profile_data.get('training_status'),
-        "main_sport": profile_data.get('main_sport')
-    }).execute()
+    db.execute("""
+        INSERT INTO user_profiles 
+        (user_id, age, gender, fitness_level, experience_years, medical_clearance, red_flags_present, training_status, main_sport)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (user_id) DO UPDATE SET
+            age = EXCLUDED.age,
+            gender = EXCLUDED.gender,
+            fitness_level = EXCLUDED.fitness_level,
+            experience_years = EXCLUDED.experience_years,
+            medical_clearance = EXCLUDED.medical_clearance,
+            red_flags_present = EXCLUDED.red_flags_present,
+            training_status = EXCLUDED.training_status,
+            main_sport = EXCLUDED.main_sport
+    """, (
+        user_id,
+        profile_data.get('age'),
+        profile_data.get('gender'),
+        profile_data.get('fitness_level'),
+        profile_data.get('experience_years'),
+        profile_data.get('medical_clearance'),
+        profile_data.get('red_flags_present'),
+        profile_data.get('training_status'),
+        profile_data.get('main_sport')
+    ))
     
     # 2. Save goals
-    supabase.table("user_goals").delete().eq("user_id", user_id).execute()
+    db.execute("DELETE FROM user_goals WHERE user_id = %s", (user_id,))
     goal = profile_data.get('goal')
     if goal:
-        supabase.table("user_goals").insert({"user_id": user_id, "goal": goal}).execute()
+        db.execute("INSERT INTO user_goals (user_id, goal) VALUES (%s, %s)", (user_id, goal))
         
     # 3. Save medical flags
-    supabase.table("user_medical_flags").delete().eq("user_id", user_id).execute()
-    medical_flags = profile_data.get('medical_flags', [])
-    if medical_flags:
-        supabase.table("user_medical_flags").insert([
-            {"user_id": user_id, "flag": flag} for flag in medical_flags
-        ]).execute()
+    db.execute("DELETE FROM user_medical_flags WHERE user_id = %s", (user_id,))
+    for flag in profile_data.get('medical_flags', []):
+        db.execute("INSERT INTO user_medical_flags (user_id, flag) VALUES (%s, %s)", (user_id, flag))
         
     # 4. Save injuries
-    supabase.table("user_injuries").delete().eq("user_id", user_id).execute()
-    injuries = profile_data.get('injuries', [])
-    if injuries:
-        supabase.table("user_injuries").insert([
-            {"user_id": user_id, "injury": injury} for injury in injuries
-        ]).execute()
+    db.execute("DELETE FROM user_injuries WHERE user_id = %s", (user_id,))
+    for injury in profile_data.get('injuries', []):
+        db.execute("INSERT INTO user_injuries (user_id, injury) VALUES (%s, %s)", (user_id, injury))

@@ -1,11 +1,11 @@
-from database import get_supabase_client
+from database import get_db
 
 def get_user_medical_flags(user_id: int) -> list[str]:
-    supabase = get_supabase_client()
-    response = supabase.table("user_medical_flags").select("flag").eq("user_id", user_id).execute()
-    return [row['flag'] for row in response.data]
+    db = get_db()
+    rows = db.fetchall("SELECT flag FROM user_medical_flags WHERE user_id = %s", (user_id,))
+    return [row['flag'] for row in rows]
 
 def get_user_injuries(user_id: int) -> list[str]:
-    supabase = get_supabase_client()
-    response = supabase.table("user_injuries").select("injury").eq("user_id", user_id).execute()
-    return [row['injury'] for row in response.data]
+    db = get_db()
+    rows = db.fetchall("SELECT injury FROM user_injuries WHERE user_id = %s", (user_id,))
+    return [row['injury'] for row in rows]
