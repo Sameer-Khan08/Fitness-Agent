@@ -6,3 +6,4 @@ requests
 pillow
 together
 watchdog
+supabase

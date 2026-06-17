@@ -17,6 +17,8 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 IMAGE_MODEL_API_KEY = os.getenv("IMAGE_MODEL_API_KEY")
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 APP_ENV = os.getenv("APP_ENV", "development")  # Default to "development" if not set.
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # --- Validate required keys ---
 

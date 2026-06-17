@@ -1,69 +1,53 @@
-from database import get_db_connection
+from database import get_supabase_client
 
 def create_user(username: str) -> int:
     """Create a new user and return their ID. Returns existing ID if user exists."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        # Try to insert
-        cursor.execute("INSERT INTO users (username) VALUES (?)", (username,))
-        user_id = cursor.lastrowid
-        conn.commit()
-    except Exception:
-        # If exists, fetch ID
-        cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
-        row = cursor.fetchone()
-        user_id = row['id'] if row else None
-    finally:
-        conn.close()
-    return user_id
+    supabase = get_supabase_client()
+    
+    # Try to fetch first
+    response = supabase.table("users").select("id").eq("username", username).execute()
+    if response.data:
+        return response.data[0]['id']
+        
+    # Insert new user
+    response = supabase.table("users").insert({"username": username}).execute()
+    return response.data[0]['id']
 
 def save_user_profile_data(user_id: int, profile_data: dict):
     """Save the full profile dictionary to the database for the given user_id."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    supabase = get_supabase_client()
     
     # 1. Save or update user_profiles
-    cursor.execute("""
-        INSERT INTO user_profiles 
-        (user_id, age, gender, fitness_level, experience_years, medical_clearance, red_flags_present, training_status, main_sport)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(user_id) DO UPDATE SET
-            age=excluded.age,
-            gender=excluded.gender,
-            fitness_level=excluded.fitness_level,
-            experience_years=excluded.experience_years,
-            medical_clearance=excluded.medical_clearance,
-            red_flags_present=excluded.red_flags_present,
-            training_status=excluded.training_status,
-            main_sport=excluded.main_sport
-    """, (
-        user_id,
-        profile_data.get('age'),
-        profile_data.get('gender'),
-        profile_data.get('fitness_level'),
-        profile_data.get('experience_years'),
-        profile_data.get('medical_clearance'),
-        profile_data.get('red_flags_present'),
-        profile_data.get('training_status'),
-        profile_data.get('main_sport')
-    ))
+    supabase.table("user_profiles").upsert({
+        "user_id": user_id,
+        "age": profile_data.get('age'),
+        "gender": profile_data.get('gender'),
+        "fitness_level": profile_data.get('fitness_level'),
+        "experience_years": profile_data.get('experience_years'),
+        "medical_clearance": profile_data.get('medical_clearance'),
+        "red_flags_present": profile_data.get('red_flags_present'),
+        "training_status": profile_data.get('training_status'),
+        "main_sport": profile_data.get('main_sport')
+    }).execute()
     
     # 2. Save goals
-    cursor.execute("DELETE FROM user_goals WHERE user_id = ?", (user_id,))
+    supabase.table("user_goals").delete().eq("user_id", user_id).execute()
     goal = profile_data.get('goal')
     if goal:
-        cursor.execute("INSERT INTO user_goals (user_id, goal) VALUES (?, ?)", (user_id, goal))
+        supabase.table("user_goals").insert({"user_id": user_id, "goal": goal}).execute()
         
     # 3. Save medical flags
-    cursor.execute("DELETE FROM user_medical_flags WHERE user_id = ?", (user_id,))
-    for flag in profile_data.get('medical_flags', []):
-        cursor.execute("INSERT INTO user_medical_flags (user_id, flag) VALUES (?, ?)", (user_id, flag))
+    supabase.table("user_medical_flags").delete().eq("user_id", user_id).execute()
+    medical_flags = profile_data.get('medical_flags', [])
+    if medical_flags:
+        supabase.table("user_medical_flags").insert([
+            {"user_id": user_id, "flag": flag} for flag in medical_flags
+        ]).execute()
         
     # 4. Save injuries
-    cursor.execute("DELETE FROM user_injuries WHERE user_id = ?", (user_id,))
-    for injury in profile_data.get('injuries', []):
-        cursor.execute("INSERT INTO user_injuries (user_id, injury) VALUES (?, ?)", (user_id, injury))
-        
-    conn.commit()
-    conn.close()
+    supabase.table("user_injuries").delete().eq("user_id", user_id).execute()
+    injuries = profile_data.get('injuries', [])
+    if injuries:
+        supabase.table("user_injuries").insert([
+            {"user_id": user_id, "injury": injury} for injury in injuries
+        ]).execute()
