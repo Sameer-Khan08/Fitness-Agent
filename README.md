@@ -75,6 +75,15 @@ The app will open in your browser at `http://localhost:8501`.
 
 ---
 
+## Exercise Demo Images
+
+- **Manual Generation:** Images are generated only on button click to prevent high API costs.
+- **Session Caching:** Generated images are cached during the session, so the same exercise image is not regenerated repeatedly.
+- **Cost Controls:** A maximum limit of 5 images per session is enforced.
+- **Safety Warning:** AI images may be inaccurate and should not replace qualified coaching. Follow the written cues carefully.
+
+---
+
 ## Safety and Security Note
 
 - **Never commit** your `.env` file or any secrets it contains.

@@ -230,3 +230,75 @@ def generate_exercise_image(exercise_name: str) -> bytes:
             f"Primary model error: {primary_error}. "
             f"Fallback model error: {fallback_error}."
         ) from fallback_error
+
+
+def generate_exercise_demo_image(exercise: dict) -> dict:
+    """
+    Safe wrapper for generating an exercise demo image.
+    Handles API errors safely and returns a result dictionary.
+    """
+    name = exercise.get("name")
+    prompt = build_exercise_demo_prompt(exercise)
+    
+    if not name:
+        return {
+            "success": False,
+            "image_url": None,
+            "error": "Exercise name is missing.",
+            "prompt": prompt
+        }
+        
+    try:
+        from src.config.settings import TOGETHER_API_KEY
+        if not TOGETHER_API_KEY:
+            return {
+                "success": False,
+                "image_url": None,
+                "error": "TOGETHER_API_KEY is not configured.",
+                "prompt": prompt
+            }
+            
+        # We use the existing function but we override its prompt by patching or we just let it use the default name prompt.
+        # Actually, the existing `generate_exercise_image` calls `build_exercise_image_prompt(exercise_name)`.
+        # To use the new `build_exercise_demo_prompt`, let's just make the Together API call directly here to ensure it uses `prompt`.
+        
+        client = Together(api_key=TOGETHER_API_KEY)
+        
+        try:
+            response = client.images.generate(
+                prompt=prompt,
+                model=IMAGE_MODEL_PRIMARY,
+                n=1,
+            )
+            img_bytes = _extract_image_bytes(response)
+        except Exception:
+            # Fallback
+            response = client.images.generate(
+                prompt=prompt,
+                model=IMAGE_MODEL_FALLBACK,
+                width=512,
+                height=512,
+                steps=4,
+                n=1,
+            )
+            img_bytes = _extract_image_bytes(response)
+            
+        # Convert bytes to base64 data URI
+        import base64
+        b64_str = base64.b64encode(img_bytes).decode('utf-8')
+        image_url = f"data:image/png;base64,{b64_str}"
+        
+        return {
+            "success": True,
+            "image_url": image_url,
+            "error": None,
+            "prompt": prompt
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "image_url": None,
+            "error": str(e),
+            "prompt": prompt
+        }
+

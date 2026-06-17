@@ -367,18 +367,41 @@ def render_exercise_card(exercise: dict, day_idx: int = 0, ex_idx: int = 0) -> N
             avoid_list_str = ", ".join(avoid_if)
             st.markdown(f"- ⚠️ {avoid_list_str.title()}")
 
-    # 4. Image Placeholder Box
-    st.markdown(
-        """
-        <div style="background-color: #0E1117; border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 16px; text-align: center; margin: 12px 0;">
-            <span style="font-size: 20px;">🖼️</span>
-            <p style="margin: 4px 0 0 0; font-size: 12px; color: #8C96A8; font-style: italic;">
-                Exercise demo image will appear here in a later version.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # 4. Image Display / Generation
+    from src.memory.image_cache import get_cached_image, save_cached_image
+    
+    cached_img = get_cached_image(name)
+    if cached_img:
+        st.image(cached_img, caption=f"{name} Demonstration", use_container_width=True)
+    else:
+        st.markdown(
+            """
+            <div style="background-color: #0E1117; border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 16px; text-align: center; margin: 12px 0;">
+                <span style="font-size: 20px;">🖼️</span>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #8C96A8; font-style: italic;">
+                    Exercise demo image will appear here.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.caption("⚠️ AI-generated exercise images may be imperfect. Follow written instructions and consult a qualified coach for technique-sensitive movements.")
+        
+        btn_key = f"generate_image_{day_idx}_{ex_idx}_{name}"
+        if st.button("🖼️ Generate Demo Image", key=btn_key):
+            count = st.session_state.get("generated_image_count", 0)
+            if count >= 5:
+                st.warning("Image generation limit reached for this session (Max 5).")
+            else:
+                from src.exercises.image_prompts import generate_exercise_demo_image
+                with st.spinner(f"Generating image for {name}..."):
+                    res = generate_exercise_demo_image(exercise)
+                    if res.get("success") and res.get("image_url"):
+                        st.session_state.generated_image_count = count + 1
+                        save_cached_image(name, res["image_url"])
+                        st.rerun()
+                    else:
+                        st.error(f"Generation failed: {res.get('error')}")
 
     # 5. Image Prompt Preview
     from src.exercises.image_prompts import build_exercise_demo_prompt

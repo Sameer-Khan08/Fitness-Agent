@@ -62,6 +62,9 @@ if "saved_plans" not in st.session_state:
 if "selected_saved_plan" not in st.session_state:
     st.session_state.selected_saved_plan = None
 
+if "generated_image_count" not in st.session_state:
+    st.session_state.generated_image_count = 0
+
 # --- Stage-based routing ---
 from src.ui.login import render_auth_page
 from src.ui.view_user_stats import render_dashboard_page
