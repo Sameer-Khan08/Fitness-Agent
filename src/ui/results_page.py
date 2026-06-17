@@ -207,6 +207,14 @@ def render_results_page() -> None:
     st.markdown("---")
 
     # Buttons
+    if st.button("💾 Save Plan", width="stretch", type="primary"):
+        from src.memory.plan_store import save_plan_local
+        save_plan_local(plan)
+        st.success("✅ Plan saved successfully!")
+        st.info("Saved for this session only (local storage).")
+        
+    st.markdown("<br>", unsafe_allow_html=True)
+
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
         if st.button("Back to Profile", width="stretch"):

@@ -68,9 +68,9 @@ from src.ui.view_user_stats import render_dashboard_page
 
 current_stage = st.session_state.stage
 
-if not supabase_configured and current_stage in ["auth", "dashboard"]:
-    st.session_state.stage = "onboarding"
-    current_stage = "onboarding"
+if not supabase_configured and current_stage in ["auth"]:
+    st.session_state.stage = "dashboard" if current_stage == "dashboard" else "onboarding"
+    current_stage = st.session_state.stage
 
 if current_stage == "auth":
     render_auth_page()

@@ -67,6 +67,14 @@ The app will open in your browser at `http://localhost:8501`.
 
 ---
 
+## Saved Plan History
+
+- **Local Storage:** Saved plan history works locally without Supabase. By default, plans are saved to Streamlit's session state.
+- **Optional Supabase:** Supabase database storage is optional. If configured, you can persist plans for logged-in users.
+- **Session Lifespan:** Local session plans disappear when the Streamlit session resets or the browser is refreshed.
+
+---
+
 ## Safety and Security Note
 
 - **Never commit** your `.env` file or any secrets it contains.
