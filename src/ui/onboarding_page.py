@@ -22,6 +22,7 @@ def render_onboarding_page() -> None:
         title="TrainWise AI",
         subtitle="AI-powered fitness and athletic performance planning with injury-aware reality checks."
     )
+    st.subheader("Athlete Onboarding")
 
     # 3. How it Works cards
     col1, col2, col3 = st.columns(3)

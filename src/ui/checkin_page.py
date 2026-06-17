@@ -8,7 +8,7 @@ import streamlit as st
 from src.memory.checkin_store import save_checkin_local
 from src.planning.readiness_engine import calculate_readiness
 from src.planning.workout_adjuster import adjust_workout_for_readiness
-from src.ui.components import inject_custom_css
+from src.ui.components import inject_custom_css, show_medical_disclaimer
 
 def render_checkin_page() -> None:
     """Display the daily check-in form."""
@@ -79,3 +79,6 @@ def render_checkin_page() -> None:
                 
             st.session_state.stage = "daily_result"
             st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    show_medical_disclaimer()

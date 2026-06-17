@@ -79,12 +79,53 @@ from src.ui.login import render_auth_page
 from src.ui.view_user_stats import render_dashboard_page
 from src.ui.checkin_page import render_checkin_page
 from src.ui.daily_result_page import render_daily_result_page
+from src.ui.nutrition_page import render_nutrition_page
 
 current_stage = st.session_state.stage
 
 if not supabase_configured and current_stage in ["auth"]:
-    st.session_state.stage = "dashboard" if current_stage == "dashboard" else "onboarding"
-    current_stage = st.session_state.stage
+    st.session_state.stage = "onboarding"
+    current_stage = "onboarding"
+
+# --- Sidebar Navigation Menu ---
+if current_stage != "auth":
+    with st.sidebar:
+        st.markdown("<h2 style='text-align: center; color: #00FF87; margin-bottom: 0;'>TrainWise AI</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: gray; font-size: 11px; margin-top: 0;'>Athletic Planning & Safety</p>", unsafe_allow_html=True)
+        st.markdown("---")
+        
+        # Navigation buttons
+        if st.button("📋 Athlete Onboarding", use_container_width=True):
+            st.session_state.stage = "onboarding"
+            st.rerun()
+            
+        if st.button("💪 Fitness Plan", use_container_width=True):
+            if st.session_state.get("profile"):
+                st.session_state.stage = "results" if st.session_state.get("results") else "plan"
+            else:
+                st.warning("⚠️ Complete onboarding first!")
+            st.rerun()
+            
+        if st.button("⏱ Daily Check-in", use_container_width=True):
+            if st.session_state.get("results"):
+                st.session_state.stage = "checkin"
+            else:
+                st.warning("⚠️ Generate a plan first!")
+            st.rerun()
+            
+        if st.button("🥗 Nutrition Guidance", use_container_width=True):
+            if st.session_state.get("profile"):
+                st.session_state.stage = "nutrition"
+            else:
+                st.warning("⚠️ Complete onboarding first!")
+            st.rerun()
+            
+        if st.button("📊 Saved Plans & Stats", use_container_width=True):
+            st.session_state.stage = "dashboard"
+            st.rerun()
+            
+        st.markdown("---")
+        st.info("⚠️ TrainWise AI provides fitness guidance and is not a medical diagnosis tool.")
 
 if current_stage == "auth":
     render_auth_page()
@@ -107,7 +148,10 @@ elif current_stage == "checkin":
 elif current_stage == "daily_result":
     render_daily_result_page()
 
+elif current_stage == "nutrition":
+    render_nutrition_page()
+
 else:
-    # Unknown stage — reset to auth as a safe fallback.
-    st.session_state.stage = "auth"
+    # Unknown stage — reset to a safe stage.
+    st.session_state.stage = "onboarding" if not supabase_configured else "auth"
     st.rerun()

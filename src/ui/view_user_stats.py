@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from src.ui.components import inject_custom_css
 from src.memory.plan_store import get_saved_plans_local
-from src.ui.components import section_header, workout_day_card
+from src.ui.components import section_header, workout_day_card, show_medical_disclaimer
 
 def render_dashboard_page():
     inject_custom_css()
@@ -53,7 +53,7 @@ def render_dashboard_page():
         st.markdown("---")
     
     # 2. Saved Plans History
-    st.subheader("Saved Training Plans")
+    st.subheader("Saved Plans")
     
     # Let's see if a plan is currently selected for viewing
     selected_plan = st.session_state.get("selected_saved_plan")
@@ -123,3 +123,6 @@ def render_dashboard_page():
                 st.session_state.clear()
                 st.session_state.stage = "auth"
                 st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    show_medical_disclaimer()

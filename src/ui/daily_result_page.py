@@ -5,13 +5,14 @@ Displays the daily readiness results and the adjusted workout plan.
 """
 
 import streamlit as st
-from src.ui.components import inject_custom_css, workout_day_card, render_status_badge
+from src.ui.components import inject_custom_css, workout_day_card, render_status_badge, show_medical_disclaimer
 
 def render_daily_result_page() -> None:
     """Display readiness status and adjusted workout."""
     inject_custom_css()
     
-    st.title("Daily Readiness")
+    st.title("Daily Check-in")
+    st.subheader("Daily Readiness")
     st.markdown("---")
     
     readiness = st.session_state.get("current_readiness")
@@ -78,3 +79,6 @@ def render_daily_result_page() -> None:
         if st.button("Start Over", use_container_width=True, type="primary"):
             st.session_state.stage = "onboarding"
             st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    show_medical_disclaimer()

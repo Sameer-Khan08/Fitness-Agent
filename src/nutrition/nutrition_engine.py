@@ -51,8 +51,8 @@ def estimate_nutrition_targets(profile: dict) -> dict:
     if age_str.isdigit():
         age = int(age_str)
         
-    weight_kg = parse_weight_kg(profile.get("weight", ""))
-    height_cm = parse_height_cm(profile.get("height", ""))
+    weight_kg = parse_weight_kg(profile.get("weight") or profile.get("weight_kg") or "")
+    height_cm = parse_height_cm(profile.get("height") or profile.get("height_cm") or "")
     
     maintenance = None
     target = None

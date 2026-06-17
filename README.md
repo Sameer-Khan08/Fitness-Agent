@@ -1,23 +1,39 @@
 # TrainWise AI
 
-**AI Fitness and Athletic Performance Coach**
-
-TrainWise AI is a Streamlit-based application designed to help users with fitness planning, athletic development, sport-specific training, and injury-aware programming.
+TrainWise AI is a premium, personal athletic coaching dashboard designed to deliver structured, goal-driven, and injury-aware fitness programming.
 
 ---
 
-## MVP Version Details
-
-- **Current Version:** Local Rule-Based MVP. The planning engine operates entirely locally using deterministic, rule-based screening and logic rather than third-party AI models.
-- **OpenAI Integration:** Fully integrated agentic capabilities using OpenAI and image models are slated for a future release stage.
-- **Medical Warning:** This app is not a medical diagnosis tool. Users experiencing severe, sharp, or persistent pain must stop training immediately and consult a qualified medical professional or physiotherapist.
+## What the App Does
+TrainWise AI dynamically builds custom weekly fitness schedules tailored to your primary training goals, sport demands, current fitness level, and joint pain or injuries. It screens for physiological warning signs and constructs safe, tailored exercise routines, daily recovery readiness checks, and baseline nutritional guidance.
 
 ---
 
-## Setup Guide
+## Features
+- **Deterministic Screening & Safety Classification**: Processes pain rating and injuries to classify readiness as green, yellow, or red status.
+- **Sport-Specific Conditioning & Prehab**: Customizes training schedules to integrate relevant drills and movement requirements for sports like football, cricket, running, etc.
+- **Personalized Exercise Cards**: Displays comprehensive instructions, target sets/reps, coach guidelines, customized reasons ("why this for you"), and common mistakes for 18 built-in movements.
+- **Daily Check-ins**: Adapts the day's exercise selection, load, and intensity based on sleeping quality, energy, stress, and muscle soreness.
+- **Nutrition Guidance**: Estimates caloric targets, baseline proteins, and hydration schedules derived from physical parameters and fitness goals.
+- **Saved Plans**: Local session-state persistence allows viewing past plans in a consolidated athlete dashboard.
+
+---
+
+## Safety Disclaimer
+
+> [!CAUTION]
+> **Important Safety & Medical Information**
+> 
+> - **Not Medical Diagnosis**: TrainWise AI is a fitness education tool. It does not provide medical diagnosis, clinical evaluations, or treatment plans.
+> - **Guidance Can Be Wrong**: AI and rule-based systems are deterministic helpers. Their recommendations can be incorrect, inappropriate, or inaccurate for your specific physiology.
+> - **Professional Help Required**: Severe pain (pain rating $\ge 8$) or medical red flags (e.g. chest pain, dizziness, fainting) require immediate attention from a qualified medical doctor, physiotherapist, or clinical specialist. **Do not attempt intense training if pain is severe.**
+> - **Inaccurate Images**: Any generated exercise demonstration images or previews are illustrative and may be anatomically or mechanically inaccurate. Always prioritize the written safety cues and instructions over visual illustrations.
+
+---
+
+## Setup
 
 ### 1. Create and Activate a Virtual Environment
-
 ```bash
 # Create the virtual environment
 python -m venv venv
@@ -29,115 +45,49 @@ source venv/bin/activate
 venv\Scripts\activate
 ```
 
----
-
-### 2. Install Requirements
-
-With your virtual environment active, install all dependencies:
-
+### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-### 3. Fill in the `.env` File
-
-Open the `.env` file in the project root and add your API keys:
-
-```
-OPENAI_API_KEY=your_openai_api_key_here
-IMAGE_MODEL_API_KEY=your_image_model_key_here
+## Environment Variables
+Create a `.env` file in the project root matching the template below:
+```env
+OPENAI_API_KEY=your_openai_api_key
+IMAGE_MODEL_API_KEY=your_image_model_key
+TOGETHER_API_KEY=your_together_ai_api_key
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_anon_key
 APP_ENV=development
 ```
-
-> **Note:** The app will raise an error on startup if `OPENAI_API_KEY` is missing or empty.
+*Note: All Supabase keys and database connection parameters are fully optional. If they are missing, TrainWise AI runs completely locally using session state.*
 
 ---
 
-### 4. Run the App with Streamlit
-
-From the `trainwise_ai/` directory, run:
-
+## How to Run
+Run the Streamlit application from the root directory:
 ```bash
 streamlit run app.py
 ```
+Open `http://localhost:8501` in your browser.
 
-The app will open in your browser at `http://localhost:8501`.
-
----
-
-## Saved Plan History
-
-- **Local Storage:** Saved plan history works locally without Supabase. By default, plans are saved to Streamlit's session state.
-- **Optional Supabase:** Supabase database storage is optional. If configured, you can persist plans for logged-in users.
-- **Session Lifespan:** Local session plans disappear when the Streamlit session resets or the browser is refreshed.
-
----
-
-## Exercise Demo Images
-
-- **Manual Generation:** Images are generated only on button click to prevent high API costs.
-- **Session Caching:** Generated images are cached during the session, so the same exercise image is not regenerated repeatedly.
-- **Cost Controls:** A maximum limit of 5 images per session is enforced.
-- **Safety Warning:** AI images may be inaccurate and should not replace qualified coaching. Follow the written cues carefully.
-
----
-
-## Daily Check-in
-
-- **Readiness Assessment:** Users can complete a quick daily check-in to assess their readiness before training.
-- **Dynamic Adjustments:** The app adjusts the day's workout intensity and modifies exercises based on sleep, soreness, stress, and pain inputs.
-- **Safety Protocol:** Readiness checks strictly enforce recovery-only days for severe or worsening symptoms. Note: The app does not diagnose injuries and users should consult professionals if pain is severe.
-
----
-
-## Safety and Security Note
-
-- **Never commit** your `.env` file or any secrets it contains.
-- API keys must remain private; treat them like passwords.
-- If an API key is ever exposed or uploaded to a public repository, **rotate/regenerate** it immediately.
-- This application is **not a medical diagnosis tool**. It provides general fitness guidance only.
-
-**TrainWise AI is not a medical diagnosis tool.**
-
-This application provides general fitness and training guidance only. It is not intended to replace professional medical advice, diagnosis, or treatment.
-
-If you experience serious or worsening symptoms — such as chest pain, severe pain, numbness, dizziness, or any sudden injury — **stop exercising immediately and consult a qualified doctor, physiotherapist, or healthcare professional** before continuing any training program.
-
-Always seek the advice of a qualified health provider with any questions you may have regarding a medical condition or injury.
-
----
-
-## Project Structure
-
+To run the automated test suite:
+```bash
+python scripts/smoke_test.py
 ```
-trainwise_ai/
-├── app.py                   # Main Streamlit entry point
-├── requirements.txt         # Python dependencies
-├── .env                     # API keys (not committed to git)
-├── .gitignore
-├── README.md
-└── src/
-    ├── config/
-    │   └── settings.py      # Environment variable loading
-    ├── memory/
-    │   └── user_profile_store.py  # In-memory profile storage
-    ├── safety/
-    │   ├── injury_rules.py  # Pain area constants
-    │   └── medical_flags.py # Red flag symptom constants
-    ├── planning/
-    │   ├── goal_engine.py
-    │   ├── sport_engine.py
-    │   └── workout_builder.py
-    ├── exercises/
-    │   ├── exercise_library.py
-    │   └── image_prompts.py
-    ├── agents/
-    │   └── fitness_agent.py
-    └── ui/
-        ├── components.py
-        ├── onboarding_page.py
-        ├── plan_page.py
-        └── results_page.py
-```
+
+---
+
+## Current Limitations
+- **Session-bound Storage**: Saved plans and daily check-in histories persist only in memory for the duration of the Streamlit session unless Supabase PostgreSQL is connected.
+- **Static Catalog**: The initial catalog comprises 18 starter exercises.
+- **Local Fallback**: Calorie targets use standard Mifflin-St Jeor defaults rather than real-time biometric metabolic trackers.
+
+---
+
+## Future Roadmap
+- **Supabase Cloud Syncing**: Enable persistent cross-session athletic accounts.
+- **Full AI-Agent Integration**: Empower the Coach Agent with direct OpenAI API tools to refine training volume and regress/progress exercises dynamically.
+- **Demo Image Rendering**: Integrate serverless FLUX/Together AI APIs to render step-by-step 2x2 movement demonstration cards.

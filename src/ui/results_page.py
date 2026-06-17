@@ -23,8 +23,9 @@ def render_results_page() -> None:
     # 1. Inject Custom CSS
     inject_custom_css()
 
-    st.title("Your TrainWise Plan")
-    st.subheader("Built from your goal, sport, fitness level, and injury context.")
+    st.title("TrainWise AI")
+    st.subheader("Fitness Plan")
+    st.markdown("Built from your goal, sport, fitness level, and injury context.")
     st.markdown("---")
 
     plan = st.session_state.get("results")
@@ -57,10 +58,38 @@ def render_results_page() -> None:
     # 2. Safety status messaging
     if safety_status == "green":
         st.success(f"🟢 **Safe to Train:** {safety_summary}")
+        st.markdown(
+            """
+            <div class="info-card" style="border-left: 5px solid #00FF87; margin-bottom: 20px;">
+                💡 <strong>Safety Recommendation:</strong> Even though you are safe to train normally, 
+                always begin sessions with a dynamic warm-up and progress training volume/intensity gradually.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     elif safety_status == "yellow":
         st.warning(f"🟡 **Modify Training:** {safety_summary}")
+        st.markdown(
+            """
+            <div class="warning-card" style="border-left: 5px solid #FFD700; margin-bottom: 20px;">
+                ⚠️ <strong>Safety Recommendation:</strong> Avoid high-risk drills (sprinting, jumping, plyometrics) 
+                and any exercise matching your injury areas. Cap intensity at a low-to-moderate level and adjust ranges of motion if pain occurs.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     else:  # red
         st.error(f"🔴 **Training Capped:** {safety_summary}")
+        st.markdown(
+            """
+            <div class="warning-card" style="border-left: 5px solid #FF4B4B; margin-bottom: 20px;">
+                🚨 <strong>CRITICAL SAFETY WARNING:</strong> Your profile indicates high pain or medical red flags. 
+                <strong>Do NOT attempt intense training.</strong> Focus only on light recovery, stability, or active rehabilitation, 
+                and immediately consult a qualified doctor or physiotherapist for guidance.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # 3. Medical warnings
     if has_red_flags:
@@ -185,11 +214,12 @@ def render_results_page() -> None:
     # Section 7: AI Coach Explanation
     section_header("AI Coach Explanation", "Get a personalized breakdown of your plan from our AI assistant.")
     
-    if st.session_state.ai_explanation:
+    explanation_val = st.session_state.get("ai_explanation")
+    if explanation_val:
         st.markdown(
             f"""
             <div class="fitness-card">
-                {st.session_state.ai_explanation}
+                {explanation_val}
             </div>
             """,
             unsafe_allow_html=True
