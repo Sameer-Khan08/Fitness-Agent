@@ -381,8 +381,8 @@ def render_exercise_card(exercise: dict, day_idx: int = 0, ex_idx: int = 0) -> N
     )
 
     # 5. Image Prompt Preview
-    from src.exercises.image_prompts import build_exercise_image_prompt
-    prompt_text = build_exercise_image_prompt(exercise.get("name", "Exercise"))
+    from src.exercises.image_prompts import build_exercise_demo_prompt
+    prompt_text = build_exercise_demo_prompt(exercise)
     with st.expander("🔍 Image Prompt Preview", expanded=False):
         st.code(prompt_text, language="text")
 

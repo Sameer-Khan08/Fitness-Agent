@@ -67,7 +67,12 @@ The app will open in your browser at `http://localhost:8501`.
 
 ---
 
-## ⚠️ Medical Disclaimer
+## Safety and Security Note
+
+- **Never commit** your `.env` file or any secrets it contains.
+- API keys must remain private; treat them like passwords.
+- If an API key is ever exposed or uploaded to a public repository, **rotate/regenerate** it immediately.
+- This application is **not a medical diagnosis tool**. It provides general fitness guidance only.
 
 **TrainWise AI is not a medical diagnosis tool.**
 

@@ -123,6 +123,23 @@ The image should look like a **professional exercise demo card** that clearly te
     return prompt
 
 
+def build_exercise_demo_prompt(exercise: dict) -> str:
+    """
+    Build a realistic exercise demo prompt using exercise details.
+    """
+    name = exercise.get("name", "exercise")
+    category = exercise.get("category", "general")
+    level = exercise.get("level", "beginner")
+    demo_focus = exercise.get("demo_focus", "correct posture")
+    
+    prompt = (
+        f"Realistic full-body fitness demonstration photo of a person performing a {name} "
+        f"in a clean gym setting. Show {demo_focus}. "
+        "No text, no labels, no distorted anatomy, no unsafe form."
+    )
+    return prompt
+
+
 def _extract_image_bytes(response) -> bytes:
     """
     Extract raw image bytes from a Together AI image response.

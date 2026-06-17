@@ -1,10 +1,18 @@
 .env
+## Safety and Security Note
+
+- **Never commit** your `.env` file or any secrets it contains.
+- API keys must remain private; treat them like passwords.
+- If an API key is ever exposed or uploaded to a public repository, **rotate/regenerate** it immediately.
+- This application is **not a medical diagnosis tool**. It provides general fitness guidance only.
+
 .env.local
 venv/
-**pycache__/
+**pycache**/
 *.pyc
 .DS_Store
 tmp/
 .streamlit/
 trainwise.db
 __MACOSX/
+.git/

@@ -118,9 +118,9 @@ def build_weekly_plan(profile: dict) -> dict:
             # No advanced exercises under red status
             if ex_level == "advanced":
                 continue
-            # No jumping, sprinting, plyometrics, heavy hinge, intense core
+            # No jumping, sprinting, plyometrics, heavy hinge, intense core, loaded spinal flexion, hard change of direction
             risk_tags = [r.lower() for r in ex.get("risk_tags", [])]
-            if any(tag in risk_tags for tag in ["jumping", "sprinting", "plyometric", "plyometrics", "heavy hinge", "intense core"]):
+            if any(tag in risk_tags for tag in ["jumping", "sprinting", "plyometric", "plyometrics", "heavy hinge", "intense core", "loaded spinal flexion", "hard change of direction"]):
                 continue
             # Avoid matching injury area or restricted pattern
             if matches_avoidance(ex, injuries_lower, avoid_list):
