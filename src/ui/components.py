@@ -264,7 +264,7 @@ def safety_card(safety: dict, medical: dict) -> None:
     """
     status = safety.get("status", "Green")
     summary = safety.get("summary", "")
-    warnings = medical.get("warnings", [])
+    warnings = medical.get("flags", [])
     message = medical.get("message", "")
 
     if status.lower() in ["green", "ready"]:
@@ -299,10 +299,98 @@ def safety_card(safety: dict, medical: dict) -> None:
         st.warning(message)
 
 
+def render_exercise_card(exercise: dict, day_idx: int = 0, ex_idx: int = 0) -> None:
+    """
+    Renders a detailed, premium exercise card with safe .get() access.
+    """
+    name = exercise.get("name", "Exercise").title()
+    category = exercise.get("category", "General").title()
+    level = exercise.get("level", "Beginner").title()
+    sets = exercise.get("sets", "3")
+    reps = exercise.get("reps", "10-12")
+    instructions = exercise.get("instructions", [])
+    common_mistakes = exercise.get("common_mistakes", [])
+    avoid_if = exercise.get("avoid_if", [])
+    why_you = exercise.get("why_you", "")
+    coach_note = exercise.get("coach_note", "")
+
+    # Header section with clean visual styling
+    st.markdown(
+        f"""
+        <div style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid #60EFFF; padding: 12px 16px; border-radius: 4px 8px 8px 4px; margin-top: 14px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 1.1rem; font-weight: bold; color: #FFFFFF;">🏋️ {name}</span>
+                <span style="background-color: rgba(0, 255, 135, 0.12); color: #00FF87; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">{level}</span>
+            </div>
+            <div style="font-size: 12px; color: #8C96A8; margin-top: 4px;">
+                Category: <span style="color: white; font-weight: 600;">{category}</span> | 
+                Scheme: <span style="color: #60EFFF; font-weight: 600;">{sets} Sets × {reps} Reps</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # 1. Why this exercise & Coach Note (rendered inside a clean container)
+    if why_you or coach_note:
+        notes_html = ""
+        if why_you:
+            notes_html += f"<div style='margin-bottom: 6px; font-size: 13px; color: #E0E0E0;'>🎯 <strong>Why this for you:</strong> {why_you}</div>"
+        if coach_note:
+            notes_html += f"<div style='font-size: 13px; color: #FFD700;'>💬 <strong>Coach Note:</strong> <em>{coach_note}</em></div>"
+            
+        st.markdown(
+            f"""
+            <div class="info-card" style="margin: 8px 0; padding: 10px 14px;">
+                {notes_html}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # 2. Instructions
+    if instructions:
+        st.markdown("**Instructions:**")
+        for i, step in enumerate(instructions):
+            st.markdown(f"{i+1}. {step}")
+
+    # 3. Common Mistakes & Avoid If Notes
+    col_l, col_r = st.columns(2)
+    with col_l:
+        if common_mistakes:
+            st.markdown("**Common Mistakes to Avoid:**")
+            for mistake in common_mistakes:
+                st.markdown(f"- ❌ {mistake}")
+    with col_r:
+        if avoid_if:
+            st.markdown("**Avoid If You Have:**")
+            avoid_list_str = ", ".join(avoid_if)
+            st.markdown(f"- ⚠️ {avoid_list_str.title()}")
+
+    # 4. Image Placeholder Box
+    st.markdown(
+        """
+        <div style="background-color: #0E1117; border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 16px; text-align: center; margin: 12px 0;">
+            <span style="font-size: 20px;">🖼️</span>
+            <p style="margin: 4px 0 0 0; font-size: 12px; color: #8C96A8; font-style: italic;">
+                Exercise demo image will appear here in a later version.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # 5. Image Prompt Preview
+    from src.exercises.image_prompts import build_exercise_image_prompt
+    prompt_text = build_exercise_image_prompt(exercise.get("name", "Exercise"))
+    with st.expander("🔍 Image Prompt Preview", expanded=False):
+        st.code(prompt_text, language="text")
+
+
 def workout_day_card(day_plan: dict, day_idx: int = 0) -> None:
     """
     Renders a premium visual card showing a full day's training program,
-    incorporating session type, warm-up, exercises with dropdown expanders, and recovery.
+    incorporating session type, warm-up, exercises with detail cards, and recovery.
     """
     day = day_plan.get("day", f"Day {day_idx + 1}")
     session_type = day_plan.get("session_type", "Training Session")
@@ -312,8 +400,6 @@ def workout_day_card(day_plan: dict, day_idx: int = 0) -> None:
     exercises = day_plan.get("exercises", [])
     cool_down = day_plan.get("cool_down", "")
     coaching = day_plan.get("coaching_note", "")
-    
-    # Check if intensity is specified in the schedule, else default
     intensity = day_plan.get("intensity", "Moderate")
 
     # Header Card Segment
@@ -351,54 +437,7 @@ def workout_day_card(day_plan: dict, day_idx: int = 0) -> None:
     if exercises:
         st.markdown("**💪 Exercises**")
         for ex_idx, exercise in enumerate(exercises):
-            name = exercise.get("name", "Exercise")
-            sets = exercise.get("sets", "—")
-            reps = exercise.get("reps", "—")
-            rest = exercise.get("rest", "—")
-            notes = exercise.get("notes", "")
-            why_you = exercise.get("why_you", "")
-            
-            # Label
-            st.markdown(
-                f"<div style='margin-top: 8px;'>🏋️ <strong>{name}</strong> · "
-                f"<span style='color: #60EFFF;'>{sets} Sets × {reps} Reps</span> (Rest: {rest})</div>",
-                unsafe_allow_html=True
-            )
-            
-            # View Instructions
-            with st.expander("📝 View Instructions & Demo", expanded=False):
-                if notes:
-                    st.markdown(f"**Technique Cue:** *{notes}*")
-                if why_you:
-                    st.markdown(
-                        f"<div class='info-card' style='margin: 8px 0;'>"
-                        f"<strong>Why this for you:</strong> {why_you}"
-                        f"</div>",
-                        unsafe_allow_html=True
-                    )
-                
-                # Image Demo
-                demo_key = f"demo_{day_idx}_{ex_idx}_{name.replace(' ', '_').lower()}"
-                show_key = f"show_{demo_key}"
-                
-                col_btn, _ = st.columns([1, 2])
-                with col_btn:
-                    if st.button("📸 Demo Image", key=f"btn_{demo_key}", width="stretch"):
-                        st.session_state[show_key] = not st.session_state.get(show_key, False)
-                        
-                if st.session_state.get(show_key, False):
-                    image_cache = st.session_state.setdefault("image_cache", {})
-                    if name not in image_cache:
-                        with st.spinner("Generating demo image..."):
-                            try:
-                                image_bytes = generate_exercise_image(name)
-                                image_cache[name] = image_bytes
-                            except Exception as e:
-                                st.error(f"Image generation failed: {e}")
-                                
-                    if name in image_cache:
-                        st.image(image_cache[name], caption=f"{name} demo", width="stretch")
-            
+            render_exercise_card(exercise, day_idx=day_idx, ex_idx=ex_idx)
             if ex_idx < len(exercises) - 1:
                 st.markdown("<hr style='margin:10px 0; opacity:0.04;'>", unsafe_allow_html=True)
     else:
@@ -451,3 +490,4 @@ def render_status_badge(status: str) -> None:
         st.error("🔴 Stop / Seek Help")
     else:
         st.info("⚪ Review Required")
+

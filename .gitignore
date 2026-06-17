@@ -1,8 +1,10 @@
 .env
-__pycache__/
+.env.local
+venv/
+**pycache__/
 *.pyc
 .DS_Store
 tmp/
 .streamlit/
-venv/
-.env.local
+trainwise.db
+__MACOSX/
