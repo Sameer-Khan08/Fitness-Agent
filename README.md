@@ -6,6 +6,14 @@ TrainWise AI is a Streamlit-based application designed to help users with fitnes
 
 ---
 
+## MVP Version Details
+
+- **Current Version:** Local Rule-Based MVP. The planning engine operates entirely locally using deterministic, rule-based screening and logic rather than third-party AI models.
+- **OpenAI Integration:** Fully integrated agentic capabilities using OpenAI and image models are slated for a future release stage.
+- **Medical Warning:** This app is not a medical diagnosis tool. Users experiencing severe, sharp, or persistent pain must stop training immediately and consult a qualified medical professional or physiotherapist.
+
+---
+
 ## Setup Guide
 
 ### 1. Create and Activate a Virtual Environment

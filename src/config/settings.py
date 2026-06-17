@@ -20,17 +20,5 @@ APP_ENV = os.getenv("APP_ENV", "development")  # Default to "development" if not
 
 # --- Validate required keys ---
 
-missing_keys = []
-
-if not OPENAI_API_KEY:
-    missing_keys.append("OPENAI_API_KEY")
-
-# TOGETHER_API_KEY and IMAGE_MODEL_API_KEY are optional at startup —
-# image generation will fail gracefully if not set.
-
-if missing_keys:
-    raise EnvironmentError(
-        f"The following required environment variables are missing or empty: "
-        f"{', '.join(missing_keys)}. "
-        f"Please fill them in your .env file before running the app."
-    )
+# Note: For this MVP rule-based step, no API keys are strictly required at startup.
+# We do not raise EnvironmentError if keys are missing.

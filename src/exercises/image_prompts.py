@@ -21,7 +21,7 @@ from together import Together
 from src.config.settings import TOGETHER_API_KEY
 
 # Primary model — as specified in project requirements.
-IMAGE_MODEL_PRIMARY = "openai/gpt-image-1.555"
+IMAGE_MODEL_PRIMARY = "openai/gpt-image-1.5"
 
 # Fallback model — fast, serverless, always available.
 IMAGE_MODEL_FALLBACK = "black-forest-labs/FLUX.1-schnell"
@@ -42,13 +42,83 @@ def build_exercise_image_prompt(exercise_name: str) -> str:
         A prompt string for the image generation model.
     """
     prompt = (
-        f"A realistic photograph of a fit athlete performing the {exercise_name} exercise "
-        f"with perfect form. "
-        "Clean modern gym setting with neutral background and soft professional lighting. "
-        "Full body visible, clear movement demonstration showing correct posture and alignment. "
-        "High quality, photorealistic, fitness magazine style. "
-        "Atleast one cycle of the movement should be visible. It should be a step-by-step infographic showing the steps of the exercise."
-        "No text, no watermarks, no overlays in the image."
+        # f"A realistic photograph of a fit athlete performing the {exercise_name} exercise "
+        # f"with perfect form. "
+        # "Clean modern gym setting with neutral background and soft professional lighting. "
+        # "Full body visible, clear movement demonstration showing correct posture and alignment. "
+        # "High quality, photorealistic, fitness magazine style. "
+        # "Atleast one cycle of the movement should be visible. It should be a step-by-step infographic showing the steps of the exercise."
+        # "No text, no watermarks, no overlays in the image."
+        '''
+Create one photorealistic fitness exercise instruction image for **{exercise_name}**.
+
+The output must be **one single image** divided into **4 clearly separated blocks/panels** in a clean **2x2 grid layout**.
+
+### Layout requirements
+
+* Panel 1 = **Step 1**
+* Panel 2 = **Step 2**
+* Panel 3 = **Step 3**
+* Panel 4 = **Step 4**
+
+Each panel must:
+
+* show the **same real human athlete**
+* show **only one body position**
+* have **clear visual separation** from the other panels
+* include a **small clean title label** at the top such as:
+
+  * **Step 1: Start**
+  * **Step 2: Lower**
+  * **Step 3: Bottom Position**
+  * **Step 4: Return**
+* include **1–2 short form labels/cues** in each panel
+
+### Form label requirements
+
+Add short, clean instructional cues near the athlete, such as:
+
+* **Chest up**
+* **Neutral spine**
+* **Knees track over toes**
+* **Heels flat**
+* **Core engaged**
+* **Controlled descent**
+* **Drive through heels**
+* **Return to start**
+
+Do not add long paragraphs.
+Keep form labels very short, clean, and easy to read.
+The labels should feel like a professional exercise instruction card.
+
+### Visual style
+
+* photorealistic
+* realistic human anatomy
+* clean modern gym background
+* same camera angle in all 4 panels
+* full body visible in every panel
+* no cropped hands, feet, knees, elbows, or head
+* consistent lighting, clothing, and body proportions
+* athlete wearing simple black athletic clothing and training shoes
+* sharp, clean, professional fitness coaching style
+
+### Important restrictions
+
+* Do not overlap movement phases in the same panel
+* Do not use motion blur
+* Do not use transparent duplicate bodies
+* Do not use ghosted movement trails
+* Do not add extra people
+* Do not clutter the image
+* Do not add logos or watermarks
+* Do not make the text too large or messy
+
+### Goal
+
+The image should look like a **professional exercise demo card** that clearly teaches the movement step by step and shows proper form in a beginner-friendly way.
+
+        '''
     )
     return prompt
 

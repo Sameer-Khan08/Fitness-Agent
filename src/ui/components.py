@@ -438,19 +438,16 @@ def show_medical_disclaimer() -> None:
     )
 
 
-def render_status_badge(status: str) -> str:
+def render_status_badge(status: str) -> None:
     """
-    Renders and returns a visually styled badge based on status context.
+    Renders status badge using Streamlit feedback blocks.
     """
     status_lower = status.lower()
-    if "ready" in status_lower or "green" in status_lower:
-        badge = '<span class="status-badge badge-ready">🟢 Ready to Train</span>'
-    elif "modify" in status_lower or "yellow" in status_lower:
-        badge = '<span class="status-badge badge-yellow">🟡 Modify Training</span>'
-    elif "stop" in status_lower or "red" in status_lower or "seek" in status_lower or "do not push" in status_lower:
-        badge = '<span class="status-badge badge-stop">🔴 Stop / Seek Help</span>'
+    if "green" in status_lower or "ready" in status_lower:
+        st.success("🟢 Ready to Train")
+    elif "yellow" in status_lower or "modify" in status_lower:
+        st.warning("🟡 Modify Training")
+    elif "red" in status_lower or "stop" in status_lower or "seek" in status_lower:
+        st.error("🔴 Stop / Seek Help")
     else:
-        badge = '<span class="status-badge badge-review">⚪ Review Required</span>'
-        
-    st.markdown(badge, unsafe_allow_html=True)
-    return badge
+        st.info("⚪ Review Required")

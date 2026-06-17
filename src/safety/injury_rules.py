@@ -1,12 +1,9 @@
 """
 injury_rules.py
 ---------------
-Contains constants and helper functions for injury screening.
-Checks user-reported pain areas and symptoms against red flag lists
-before plan generation.
+Contains constants and helper functions for classifying training status
+and generating injury-specific avoidance rules.
 """
-
-from src.safety.medical_flags import GENERAL_RED_FLAGS
 
 # Common body areas where users may experience pain or injury.
 PAIN_AREAS: list[str] = [
@@ -23,70 +20,77 @@ PAIN_AREAS: list[str] = [
     "foot",
 ]
 
-# Pain rating threshold at or above which extra warnings are triggered.
-HIGH_PAIN_THRESHOLD = 8
 
-
-def check_red_flags(injuries: str, pain_rating: int) -> list[str]:
+def classify_training_status(profile: dict) -> dict:
     """
-    Scan user-reported injuries for red flag symptoms and high pain ratings.
+    Classify training status (green, yellow, red) based on the user profile pain rating,
+    and generate custom avoidances and recommendations.
 
     Args:
-        injuries:    Free-text injury description entered by the user.
-        pain_rating: Numeric pain rating from 0 to 10.
+        profile: The user profile dictionary.
 
     Returns:
-        A list of warning strings. Empty list means no red flags detected.
+        A dictionary with keys: status, summary, avoid, recommendations.
     """
-    warnings = []
+    pain_rating = profile.get("pain_rating")
+    
+    # If pain rating is missing, default to yellow.
+    if pain_rating is None:
+        status = "yellow"
+    elif pain_rating <= 3:
+        status = "green"
+    elif pain_rating <= 6:
+        status = "yellow"
+    else:
+        status = "red"
 
-    if not injuries:
-        injuries = ""
+    avoid = []
+    recommendations = []
+    
+    # Base summaries, avoids, and recommendations based on status
+    if status == "green":
+        summary = "User can train normally but should still warm up and progress gradually."
+        recommendations.append("Begin each session with dynamic warm-up drills.")
+        recommendations.append("Progress training volume and intensity gradually week-over-week.")
+    elif status == "yellow":
+        summary = "User can train, but should modify intensity and avoid painful movements."
+        recommendations.append("Cap intensity at a moderate level.")
+        recommendations.append("Swap any movements that trigger pain with pain-free regressions.")
+    else:  # red
+        summary = "User should avoid intense training and seek professional help if pain is severe, worsening, sharp, or limiting movement."
+        recommendations.append("Focus on low-intensity mobility, stability, and restoration work.")
+        recommendations.append("Consult a doctor or physiotherapist for diagnostic evaluation.")
 
-    injuries_lower = injuries.lower()
+    # Area-specific avoid rules based on injury text
+    injury_text = (profile.get("injuries", "") or "").lower()
 
-    # Check for any red flag keywords in the injury description.
-    for flag in GENERAL_RED_FLAGS:
-        if flag in injuries_lower:
-            warnings.append(
-                f"⚠️ Red flag symptom detected: '{flag}'. "
-                "Please consult a doctor or physiotherapist before starting any exercise program."
-            )
+    if "groin" in injury_text:
+        avoid.extend(["sprinting", "hard cutting", "aggressive adductor stretching"])
+        recommendations.append("Focus on closed-chain hip stability and core work.")
 
-    # Check for high pain rating.
-    if pain_rating >= HIGH_PAIN_THRESHOLD:
-        warnings.append(
-            f"⚠️ High pain rating reported ({pain_rating}/10). "
-            "Training with pain at this level is not recommended. "
-            "Please seek medical advice before exercising."
-        )
+    if "knee" in injury_text:
+        avoid.extend(["high-volume jumping", "deep painful squats", "hard deceleration drills"])
+        recommendations.append("Prioritize hip-dominant exercises (e.g. glute bridges) to offload the knee joint.")
 
-    return warnings
+    if "ankle" in injury_text or "achilles" in injury_text:
+        avoid.extend(["max sprinting", "plyometrics", "hard change of direction"])
+        recommendations.append("Prioritize calf raises and ankle balance/stability drills.")
 
+    if "shoulder" in injury_text:
+        avoid.extend(["painful overhead pressing", "heavy dips", "unstable heavy pressing"])
+        recommendations.append("Focus on rotator cuff strengthening and horizontal pulling patterns.")
 
-def build_injury_constraints(injuries: str, pain_rating: int) -> str:
-    """
-    Build a plain-text constraint string to inject into the AI prompt.
-    Tells the AI what to avoid or modify based on reported injuries.
+    if "lower back" in injury_text:
+        avoid.extend(["heavy deadlifts", "heavy squats", "loaded spinal flexion"])
+        recommendations.append("Focus on neutral-spine core stabilization (e.g. dead bugs, planks) and hip mobility.")
 
-    Args:
-        injuries:    Free-text injury description.
-        pain_rating: Numeric pain rating from 0 to 10.
+    if "wrist" in injury_text or "elbow" in injury_text:
+        avoid.extend(["painful curls", "heavy gripping", "painful push-ups"])
+        recommendations.append("Use neutral grip (dumbbells) where possible and avoid high-grip-strength demands.")
 
-    Returns:
-        A string of injury constraints for the AI prompt.
-    """
-    if not injuries or injuries.strip() == "":
-        return "The user has reported no injuries or pain. No movement restrictions apply."
-
-    pain_label = "low" if pain_rating <= 3 else "moderate" if pain_rating <= 6 else "high"
-
-    return (
-        f"The user has reported the following injuries or pain areas: '{injuries}'. "
-        f"Current pain rating: {pain_rating}/10 ({pain_label}). "
-        "You MUST: "
-        "(1) Avoid any exercises that load or stress the reported pain areas through full range, "
-        "(2) Suggest appropriate modifications or regressions for affected movements, "
-        "(3) Include relevant mobility and stability work to support recovery, "
-        "(4) Flag any sessions where the user should monitor symptoms carefully."
-    )
+    return {
+        "status": status,
+        "summary": summary,
+        "avoid": avoid,
+        "recommendations": recommendations,
+    }
