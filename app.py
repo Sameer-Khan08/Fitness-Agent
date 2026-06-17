@@ -65,9 +65,20 @@ if "selected_saved_plan" not in st.session_state:
 if "generated_image_count" not in st.session_state:
     st.session_state.generated_image_count = 0
 
+if "checkins" not in st.session_state:
+    st.session_state.checkins = []
+
+if "current_readiness" not in st.session_state:
+    st.session_state.current_readiness = None
+
+if "adjusted_today_workout" not in st.session_state:
+    st.session_state.adjusted_today_workout = None
+
 # --- Stage-based routing ---
 from src.ui.login import render_auth_page
 from src.ui.view_user_stats import render_dashboard_page
+from src.ui.checkin_page import render_checkin_page
+from src.ui.daily_result_page import render_daily_result_page
 
 current_stage = st.session_state.stage
 
@@ -89,6 +100,12 @@ elif current_stage == "plan":
 
 elif current_stage == "results":
     render_results_page()
+
+elif current_stage == "checkin":
+    render_checkin_page()
+
+elif current_stage == "daily_result":
+    render_daily_result_page()
 
 else:
     # Unknown stage — reset to auth as a safe fallback.

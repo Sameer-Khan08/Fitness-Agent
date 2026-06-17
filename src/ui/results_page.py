@@ -215,6 +215,12 @@ def render_results_page() -> None:
         
     st.markdown("<br>", unsafe_allow_html=True)
 
+    if st.button("📊 Daily Check-in / Adjust Today's Workout", width="stretch", type="primary"):
+        st.session_state.stage = "checkin"
+        st.rerun()
+        
+    st.markdown("<br>", unsafe_allow_html=True)
+
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
         if st.button("Back to Profile", width="stretch"):

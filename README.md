@@ -84,6 +84,14 @@ The app will open in your browser at `http://localhost:8501`.
 
 ---
 
+## Daily Check-in
+
+- **Readiness Assessment:** Users can complete a quick daily check-in to assess their readiness before training.
+- **Dynamic Adjustments:** The app adjusts the day's workout intensity and modifies exercises based on sleep, soreness, stress, and pain inputs.
+- **Safety Protocol:** Readiness checks strictly enforce recovery-only days for severe or worsening symptoms. Note: The app does not diagnose injuries and users should consult professionals if pain is severe.
+
+---
+
 ## Safety and Security Note
 
 - **Never commit** your `.env` file or any secrets it contains.
