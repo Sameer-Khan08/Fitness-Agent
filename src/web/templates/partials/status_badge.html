@@ -1,0 +1,9 @@
+{% macro status_badge(status) %}
+{% set s = status|lower %}
+<span class="status-badge {% if 'green' in s or 'ready' in s %}badge-green{% elif 'yellow' in s or 'modify' in s %}badge-yellow{% elif 'red' in s or 'stop' in s or 'seek' in s %}badge-red{% else %}badge-neutral{% endif %}">
+    {% if 'green' in s or 'ready' in s %}Ready to Train
+    {% elif 'yellow' in s or 'modify' in s %}Modify Training
+    {% elif 'red' in s or 'stop' in s %}Stop / Seek Help
+    {% else %}Review Required{% endif %}
+</span>
+{% endmacro %}

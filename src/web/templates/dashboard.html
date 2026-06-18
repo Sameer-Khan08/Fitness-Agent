@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Saved Plans Dashboard</h1>
+    <p>View saved training plans and service connection status.</p>
+</section>
+
+<section class="card">
+    <h3>Saved Plans</h3>
+    <p class="subtitle">Total saved: {{ saved_plans|length }}</p>
+
+    {% if saved_plans %}
+    <form action="{{ url_for('web.clear_saved_plans') }}" method="post" class="inline-form">
+        <button type="submit" class="btn btn-secondary">Clear Saved Plans</button>
+    </form>
+    <div class="saved-plans-list">
+        {% for plan in saved_plans %}
+        <div class="saved-plan-item">
+            <p>
+                <strong>{{ plan.saved_at|default('Unknown Date') }}</strong> |
+                Goal: {{ plan.profile_summary.main_goal|default('General') }} |
+                Sport: {{ plan.profile_summary.sport|default('None') }} |
+                Safety: {{ plan.safety.status|default('Unknown')|title }}
+            </p>
+            <a href="{{ url_for('web.saved_plan_detail', plan_index=loop.index0) }}" class="btn btn-secondary">View Details</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="info-box">
+        <h4>No Saved Plans Found</h4>
+        <p>Generate a fitness plan and click "Save Plan" to archive it here.</p>
+    </div>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h3>API Status</h3>
+    <ul class="status-list">
+        <li class="{% if api_status.text_ai %}status-ok{% else %}status-warn{% endif %}">
+            AI Coach: {% if api_status.text_ai %}Configured{% else %}Missing (AI explanations disabled){% endif %}
+        </li>
+        <li class="{% if api_status.images %}status-ok{% else %}status-warn{% endif %}">
+            Together AI: {% if api_status.images %}Configured{% else %}Missing (demo images disabled){% endif %}
+        </li>
+        <li class="{% if api_status.supabase %}status-ok{% else %}status-info{% endif %}">
+            Supabase: {% if api_status.supabase %}Configured{% else %}Local fallback mode{% endif %}
+        </li>
+    </ul>
+</section>
+
+<details class="card">
+    <summary>Deployment Checklist</summary>
+    <ul class="checklist">
+        <li>{% if checklist.requirements_txt %}✅{% else %}❌{% endif %} requirements.txt</li>
+        <li>{% if checklist.env_example %}✅{% else %}❌{% endif %} .env.example</li>
+        <li>{% if checklist.readme %}✅{% else %}❌{% endif %} README.md</li>
+        <li>🟢 Core rule-based planner works without API keys</li>
+        <li>{% if checklist.text_ai %}🟢{% else %}🟡{% endif %} Text AI key {% if checklist.text_ai %}configured{% else %}missing{% endif %}</li>
+        <li>{% if checklist.images %}🟢{% else %}🟡{% endif %} Images AI key {% if checklist.images %}configured{% else %}missing{% endif %}</li>
+        <li>{% if checklist.supabase %}🟢{% else %}🔵{% endif %} Supabase {% if checklist.supabase %}configured{% else %}local mode{% endif %}</li>
+    </ul>
+</details>
+
+<a href="{{ url_for('web.onboarding') }}" class="btn btn-primary">Generate New Workout Plan</a>
+{% endblock %}

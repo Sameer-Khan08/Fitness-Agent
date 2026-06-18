@@ -12,7 +12,6 @@ venv/
 *.pyc
 .DS_Store
 tmp/
-.streamlit/
 trainwise.db
 __MACOSX/
 .git/

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Daily Check-in — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Daily Check-in</h1>
+    <p>Track readiness, pain, and fatigue to adapt today's training.</p>
+</section>
+
+<form class="form-card" action="{{ url_for('web.daily_checkin') }}" method="post">
+    <fieldset>
+        <legend>Recovery</legend>
+        <div class="form-row">
+            <label>Sleep Quality
+                <select name="sleep_quality">
+                    <option value="poor">Poor</option>
+                    <option value="okay" selected>Okay</option>
+                    <option value="good">Good</option>
+                </select>
+            </label>
+            <label>Energy Level
+                <select name="energy_level">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Muscle Soreness (0–10)
+                <input type="range" name="soreness" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
+                <span class="range-value">0</span>
+            </label>
+            <label>Stress (0–10)
+                <input type="range" name="stress" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
+                <span class="range-value">0</span>
+            </label>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Pain &amp; Symptoms</legend>
+        <div class="form-row">
+            <label>Current Pain Rating (0–10)
+                <input type="range" name="pain_rating" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
+                <span class="range-value">0</span>
+            </label>
+            <label>Pain Area Today
+                <input type="text" name="pain_area" placeholder="e.g. lower back, knee">
+            </label>
+        </div>
+        <label>Pain Trend
+            <select name="pain_trend">
+                <option value="better">Better</option>
+                <option value="same" selected>Same</option>
+                <option value="worse">Worse</option>
+            </select>
+        </label>
+    </fieldset>
+
+    <fieldset>
+        <legend>Context</legend>
+        <div class="form-row">
+            <label>Trained yesterday?
+                <select name="trained_yesterday">
+                    <option value="yes">Yes</option>
+                    <option value="no" selected>No</option>
+                </select>
+            </label>
+            <label>Ready to train?
+                <select name="ready_to_train">
+                    <option value="yes" selected>Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </label>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn-primary btn-block">Submit Check-in</button>
+</form>
+
+<a href="{{ url_for('web.results') }}" class="btn btn-secondary">Back to Results</a>
+{% endblock %}

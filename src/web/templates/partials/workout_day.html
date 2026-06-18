@@ -1,0 +1,34 @@
+<div class="workout-day-panel" data-day-panel="{{ day_idx }}" {% if day_idx != 0 %}hidden{% endif %}>
+    <div class="workout-day-header">
+        <h3>{{ day_plan.day }} — {{ day_plan.session_type }}</h3>
+        <p class="session-meta">
+            <span>Intensity: {{ day_plan.intensity|default('Moderate')|upper }}</span>
+            <span>Duration: {{ day_plan.duration_minutes }} min</span>
+        </p>
+        {% if day_plan.session_goal %}<p class="session-goal">Goal: {{ day_plan.session_goal }}</p>{% endif %}
+        {% if day_plan.focus %}<p>Focus: {{ day_plan.focus }}</p>{% endif %}
+    </div>
+
+    {% if day_plan.warm_up %}
+    <p><strong>Warm-Up:</strong> {{ day_plan.warm_up }}</p>
+    {% endif %}
+
+    <div class="exercises-list">
+        {% for exercise in day_plan.exercises %}
+            {% set ex_idx = loop.index0 %}
+            {% include 'partials/exercise_card.html' %}
+        {% else %}
+        <p>No exercises programmed.</p>
+        {% endfor %}
+    </div>
+
+    {% if day_plan.cool_down %}
+    <p><strong>Cool-Down:</strong> {{ day_plan.cool_down }}</p>
+    {% endif %}
+
+    {% if day_plan.coaching_note %}
+    <div class="info-box coaching-note">
+        <strong>Coach's Advice:</strong> {{ day_plan.coaching_note }}
+    </div>
+    {% endif %}
+</div>

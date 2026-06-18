@@ -1,0 +1,8 @@
+<header class="page-header">
+    {% block header %}
+    <h1>{% block page_title %}TrainWise AI{% endblock %}</h1>
+    {% if self.page_subtitle() %}
+    <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
+    {% endif %}
+    {% endblock %}
+</header>

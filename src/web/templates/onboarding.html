@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Profile Setup — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Profile Setup</h1>
+    <p>Specify your biometrics, goals, and training experience to build your injury-aware athletic training program.</p>
+</section>
+
+<div class="steps-grid">
+    <div class="metric-card"><span class="step-icon">🎯</span><h5>1. Tell us your goal</h5><p>Specify what you want to achieve or improve.</p></div>
+    <div class="metric-card"><span class="step-icon">🩹</span><h5>2. Add Sport &amp; Pain</h5><p>Add athletic and pain context for safety screening.</p></div>
+    <div class="metric-card"><span class="step-icon">⚡</span><h5>3. Get your plan</h5><p>Generate a custom, injury-aware coach routine.</p></div>
+</div>
+
+<details class="demo-profiles">
+    <summary>Demo Test Profiles</summary>
+    <div class="demo-buttons">
+        <form action="{{ url_for('web.load_demo_profile', demo_type='athlete') }}" method="post">
+            <button type="submit" class="btn btn-primary">Load Demo Athlete Profile</button>
+        </form>
+        <form action="{{ url_for('web.load_demo_profile', demo_type='weight_loss') }}" method="post">
+            <button type="submit" class="btn btn-secondary">Beginner Weight Loss</button>
+        </form>
+        <form action="{{ url_for('web.load_demo_profile', demo_type='groin_pain') }}" method="post">
+            <button type="submit" class="btn btn-secondary">Football Groin Pain</button>
+        </form>
+        <form action="{{ url_for('web.load_demo_profile', demo_type='red_back_pain') }}" method="post">
+            <button type="submit" class="btn btn-secondary">Red Flag Lower Back Pain</button>
+        </form>
+    </div>
+</details>
+
+<form class="form-card" action="{{ url_for('web.onboarding') }}" method="post">
+    <fieldset>
+        <legend>Basic Info</legend>
+        <div class="form-row">
+            <label>Age (years)
+                <input type="number" name="age" min="12" max="100" value="25" required>
+            </label>
+            <label>Gender
+                <select name="gender">
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                    <option>Prefer not to say</option>
+                </select>
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Height
+                <input type="text" name="height" value="170" placeholder="e.g. 170 or 5'9&quot;">
+            </label>
+            <label>Weight
+                <input type="text" name="weight" value="70" placeholder="e.g. 70 or 154 lbs">
+            </label>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Goal &amp; Sport</legend>
+        <div class="form-row">
+            <label>Main Goal
+                <select name="main_goal">
+                    <option>Weight Loss</option>
+                    <option>Muscle Gain</option>
+                    <option>General Fitness</option>
+                    <option selected>Athletic Performance</option>
+                    <option>Sport-Specific Performance</option>
+                    <option>Strength</option>
+                    <option>Endurance</option>
+                    <option>Mobility</option>
+                </select>
+            </label>
+            <label>Sport Focus
+                <select name="sport">
+                    <option>None</option>
+                    <option>Gym Only</option>
+                    <option selected>Football</option>
+                    <option>Soccer</option>
+                    <option>Basketball</option>
+                    <option>Cricket</option>
+                    <option>Tennis</option>
+                    <option>Badminton</option>
+                    <option>Running</option>
+                    <option>Other</option>
+                </select>
+            </label>
+        </div>
+        <label>Fitness Level
+            <select name="fitness_level">
+                <option>Beginner</option>
+                <option selected>Intermediate</option>
+                <option>Advanced</option>
+            </select>
+        </label>
+        <label>Primary problem or goal description
+            <textarea name="primary_problem" rows="4" placeholder="Describe your exact situation…"></textarea>
+        </label>
+    </fieldset>
+
+    <fieldset>
+        <legend>Training Availability</legend>
+        <label>Training days per week
+            <input type="range" name="training_days_per_week" min="2" max="7" value="3" oninput="this.nextElementSibling.textContent=this.value">
+            <span class="range-value">3</span>
+        </label>
+        <label>Preferred session duration
+            <select name="session_duration">
+                <option>30 minutes</option>
+                <option>45 minutes</option>
+                <option selected>60 minutes</option>
+                <option>75 minutes</option>
+                <option>90 minutes</option>
+            </select>
+        </label>
+    </fieldset>
+
+    <fieldset>
+        <legend>Pain / Injury Check</legend>
+        <p class="info-note">Please be honest about pain levels and injury history so the safety engine can filter exercises correctly.</p>
+        <label>Injuries or pain areas
+            <textarea name="injuries" rows="3" placeholder="e.g. groin pain during sprinting"></textarea>
+        </label>
+        <label>Current pain rating (0 = none, 10 = worst)
+            <input type="range" name="pain_rating" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
+            <span class="range-value">0</span>
+        </label>
+    </fieldset>
+
+    <button type="submit" class="btn btn-primary btn-block">Build My Plan</button>
+</form>
+{% endblock %}

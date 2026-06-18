@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from 'partials/status_badge.html' import status_badge %}
+{% block title %}Check-in Result — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Daily Check-in Result</h1>
+    <p>Your readiness assessment and adjusted workout for today.</p>
+</section>
+
+<div class="card">
+    <div class="readiness-score">
+        <span class="label">Readiness Score</span>
+        <strong class="score">{{ readiness.score|default(0) }}/100</strong>
+    </div>
+    <p>{{ status_badge(readiness.readiness|default('review')) }}</p>
+    <p><strong>Recommendation:</strong> {{ readiness.recommendation|default('') }}</p>
+    <p class="summary">{{ readiness.summary|default('') }}</p>
+</div>
+
+{% if readiness.modifications or readiness.avoid_today %}
+<div class="card">
+    <h3>Action Plan</h3>
+    <div class="two-col">
+        {% if readiness.modifications %}
+        <div>
+            <h4>Modifications</h4>
+            <ul>{% for m in readiness.modifications %}<li>🔄 {{ m }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+        {% if readiness.avoid_today %}
+        <div>
+            <h4>Avoid Today</h4>
+            <ul>{% for a in readiness.avoid_today %}<li>🚫 {{ a }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% if adjusted_workout %}
+<section class="card">
+    <h3>Today's Adjusted Workout</h3>
+    {% set day_plan = adjusted_workout %}
+    {% set day_idx = 0 %}
+    {% include 'partials/workout_day.html' %}
+</section>
+{% else %}
+<p class="info-inline">No workout found to adjust.</p>
+{% endif %}
+
+<div class="action-buttons">
+    <a href="{{ url_for('web.results') }}" class="btn btn-secondary">Back to Results</a>
+    <a href="{{ url_for('web.daily_checkin') }}" class="btn btn-primary">New Check-in</a>
+    <form action="{{ url_for('web.start_over') }}" method="post">
+        <button type="submit" class="btn btn-secondary">Start Over</button>
+    </form>
+</div>
+{% endblock %}

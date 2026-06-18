@@ -1,0 +1,81 @@
+<div class="exercise-card" id="exercise-{{ day_idx }}-{{ ex_idx }}">
+    {% set images_available = images_available|default(false) %}
+    {% set image_limit_reached = image_limit_reached|default(true) %}
+    {% set exercise_prompts = exercise_prompts|default({}) %}
+    <div class="exercise-header">
+        <h4>{{ exercise.name|title }}</h4>
+        <span class="level-badge">{{ exercise.level|title }}</span>
+    </div>    <p class="exercise-meta">
+        Category: <strong>{{ exercise.category|title }}</strong> |
+        Scheme: <strong>{{ exercise.sets }} × {{ exercise.reps }}</strong>
+    </p>
+
+    {% if exercise.why_you or exercise.coach_note %}
+    <div class="info-box">
+        {% if exercise.why_you %}<p>🎯 <strong>Why this for you:</strong> {{ exercise.why_you }}</p>{% endif %}
+        {% if exercise.coach_note %}<p>💬 <strong>Coach Note:</strong> <em>{{ exercise.coach_note }}</em></p>{% endif %}
+    </div>
+    {% endif %}
+
+    <details class="exercise-details">
+        <summary>Instructions</summary>
+        <ol>
+            {% for step in exercise.instructions %}
+            <li>{{ step }}</li>
+            {% else %}
+            <li>No instructions provided.</li>
+            {% endfor %}
+        </ol>
+    </details>
+
+    {% if exercise.common_mistakes %}
+    <details class="exercise-details">
+        <summary>Common Mistakes</summary>
+        <ul>
+            {% for mistake in exercise.common_mistakes %}
+            <li>{{ mistake }}</li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endif %}
+
+    {% if exercise.avoid_if %}
+    <details class="exercise-details">
+        <summary>Avoid If</summary>
+        <p>Do not perform if you experience pain in: {{ exercise.avoid_if|join(', ')|title }}</p>
+    </details>
+    {% endif %}
+
+    <div class="exercise-image">
+        {% set cached = get_cached_image(exercise.name) %}
+        {% if cached %}
+        <img src="{{ cached }}" alt="Demo for {{ exercise.name|title }}" class="demo-image">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/placeholder_exercise.svg') }}" alt="Placeholder" class="demo-image placeholder">
+        <p class="image-note">No demonstration image generated yet.</p>
+        {% endif %}
+        <p class="image-warning">AI-generated exercise images may be imperfect. Follow written instructions and consult a qualified coach.</p>
+
+        {% if images_available %}
+            {% if cached %}
+            <button class="btn btn-secondary btn-block" disabled>Demo Image Generated</button>
+            {% elif image_limit_reached %}
+            <p class="warning-inline">Session limit reached (max 5 images).</p>
+            <button class="btn btn-secondary btn-block" disabled>Generate Demo Image</button>
+            {% else %}
+            <form action="{{ url_for('web.generate_exercise_image_route') }}" method="post">
+                <input type="hidden" name="day_idx" value="{{ day_idx }}">
+                <input type="hidden" name="ex_idx" value="{{ ex_idx }}">
+                <button type="submit" class="btn btn-secondary btn-block">Generate Demo Image</button>
+            </form>
+            {% endif %}
+        {% else %}
+        <p class="info-inline">Image generation disabled — API key not configured.</p>
+        {% endif %}
+    </div>
+
+    <details class="exercise-details">
+        <summary>Image Prompt Preview</summary>
+        <pre class="prompt-preview">{{ exercise_prompts.get(day_idx ~ '_' ~ ex_idx, '') }}</pre>
+    </details>
+</div>

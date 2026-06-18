@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from 'partials/status_badge.html' import status_badge %}
+{% block title %}Saved Plan — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Saved Plan</h1>
+    <p>Saved on {{ plan.saved_at|default('Unknown Date') }}</p>
+</section>
+
+<div class="card">
+    <p>{{ status_badge(plan.safety.status|default('review')) }}</p>
+    <p>{{ plan.safety.summary|default('') }}</p>
+</div>
+
+{% if plan.goal_priorities.priorities %}
+<div class="card">
+    <h3>Goal Priorities</h3>
+    <p>{{ plan.goal_priorities.priorities|join(', ') }}</p>
+</div>
+{% endif %}
+
+{% if plan.sport_demands.demands %}
+<div class="card">
+    <h3>Sport Demands</h3>
+    <p>{{ plan.sport_demands.demands|join(', ') }}</p>
+</div>
+{% endif %}
+
+<section class="card weekly-plan">
+    <h2>Weekly Plan</h2>
+    {% set weekly = plan.weekly_plan|default([]) %}
+    {% if weekly %}
+    <div class="day-tabs" role="tablist">
+        {% for day_plan in weekly %}
+        <button type="button" class="day-tab {% if loop.index0 == 0 %}active{% endif %}" data-day-tab="{{ loop.index0 }}">
+            {{ day_plan.day|default('Day ' ~ loop.index) }}
+        </button>
+        {% endfor %}
+    </div>
+    <div class="day-panels">
+        {% for day_plan in weekly %}
+            {% set day_idx = loop.index0 %}
+            {% include 'partials/workout_day.html' %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No weekly schedule in this saved plan.</p>
+    {% endif %}
+</section>
+
+<a href="{{ url_for('web.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+{% endblock %}

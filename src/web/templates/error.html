@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Error — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Something went wrong</h1>
+    <p>{{ message|default('An unexpected error occurred.') }}</p>
+</section>
+<a href="{{ url_for('web.index') }}" class="btn btn-primary">Return Home</a>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Plan Builder — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Current Plan</h1>
+    <p>Review your profile and generate your athletic training program.</p>
+</section>
+
+<div class="card profile-summary">
+    <h3>Athlete Profile Summary</h3>
+    <div class="profile-grid">
+        <div><span class="label">Goal</span><strong>{{ profile.main_goal }}</strong></div>
+        <div><span class="label">Sport</span><strong>{{ profile.sport }}</strong></div>
+        <div><span class="label">Level</span><strong>{{ profile.fitness_level }}</strong></div>
+        <div><span class="label">Days / Week</span><strong>{{ profile.training_days_per_week }}</strong></div>
+        <div><span class="label">Pain Rating</span><strong>{{ profile.pain_rating }}/10</strong></div>
+        <div><span class="label">Biometrics</span><strong>{{ profile.age }}y | {{ profile.height_cm }} | {{ profile.weight_kg }}</strong></div>
+    </div>
+</div>
+
+<div class="metrics-row">
+    <div class="metric-card"><span class="label">Goal Focus</span><strong>{{ profile.main_goal }}</strong></div>
+    <div class="metric-card"><span class="label">Sport Demand</span><strong>{{ profile.sport }}</strong></div>
+    <div class="metric-card"><span class="label">Current Pain</span><strong>{{ profile.pain_rating }}/10</strong></div>
+</div>
+
+<section class="card">
+    <h3>What TrainWise Will Check</h3>
+    <div class="checks-grid">
+        <div class="metric-card">🎯 Training Goal</div>
+        <div class="metric-card">🏅 Sport Demands</div>
+        <div class="metric-card">⚡ Fitness Level</div>
+        <div class="metric-card">🛡️ Pain/Injury Risk</div>
+    </div>
+</section>
+
+<form action="{{ url_for('web.generate_plan') }}" method="post" class="action-form">
+    <button type="submit" class="btn btn-primary btn-block">Generate My Training Plan</button>
+</form>
+<a href="{{ url_for('web.onboarding') }}" class="btn btn-secondary btn-block">Edit Profile</a>
+{% endblock %}

@@ -1,7 +1,9 @@
-streamlit
-openai
+Flask
 python-dotenv
 requests
-together
-psycopg2-binary
+pillow
 pandas
+supabase
+plotly
+gunicorn
+together

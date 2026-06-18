@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Nutrition — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <h1>Nutrition Guidance</h1>
+    <p>Personalized caloric recommendations, protein targets, and meal structure.</p>
+</section>
+
+<div class="metrics-row">
+    <div class="metric-card">
+        <span class="label">Estimated Maintenance</span>
+        <strong>{% if nutrition.maintenance_calories %}{{ nutrition.maintenance_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
+    </div>
+    <div class="metric-card">
+        <span class="label">Daily Target</span>
+        <strong>{% if nutrition.target_calories %}{{ nutrition.target_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Macronutrients &amp; Hydration</h3>
+    <p>🍗 <strong>Protein Target:</strong> {{ nutrition.protein_range_g|default('—') }}</p>
+    <p>💧 <strong>Hydration:</strong> {{ nutrition.hydration|default('—') }}</p>
+</div>
+
+<div class="card">
+    <h3>Meal Structure Guidelines</h3>
+    <ul>
+        {% for item in nutrition.meal_structure|default([]) %}
+        <li>{{ item }}</li>
+        {% else %}
+        <li>No meal structure guidelines available.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% if nutrition.notes %}
+<div class="card">
+    <h3>Coach Notes</h3>
+    {% for note in nutrition.notes %}
+    <p class="info-inline">👉 {{ note }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>AI Nutrition Explanation</h3>
+    {% if ai_explanation %}
+    <pre class="ai-explanation">{{ ai_explanation }}</pre>
+    {% elif text_ai_available %}
+    <form action="{{ url_for('web.generate_nutrition_ai_explanation_route') }}" method="post">
+        <button type="submit" class="btn btn-secondary">Generate AI Explanation</button>
+    </form>
+    {% else %}
+    <p class="info-inline">AI explanation unavailable — text AI API key not configured.</p>
+    {% endif %}
+</div>
+
+<div class="action-buttons">
+    <a href="{{ url_for('web.results') if session.get('results') else url_for('web.plan') }}" class="btn btn-secondary">Fitness Plan</a>
+    <a href="{{ url_for('web.daily_checkin') }}" class="btn btn-secondary">Daily Check-in</a>
+    <a href="{{ url_for('web.dashboard') }}" class="btn btn-secondary">Saved Plans</a>
+</div>
+{% endblock %}

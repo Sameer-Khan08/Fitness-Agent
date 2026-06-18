@@ -4,14 +4,13 @@ image_prompts.py
 Handles exercise demonstration image generation using the
 Together AI client.
 
-Primary model  : openai/gpt-image-1.5  (high quality)
+Primary model  : black-forest-labs/FLUX.1.1-pro (high quality)
 Fallback model : black-forest-labs/FLUX.1-schnell (fast, serverless)
 
 The API may return images as either base64 JSON or a hosted URL.
 Both cases are handled automatically.
 
-Images are returned as raw bytes so they can be displayed directly
-in Streamlit via st.image().
+Images are returned as raw bytes or base64 data URIs for display.
 """
 
 import base64
@@ -20,8 +19,8 @@ from together import Together
 
 from src.config.settings import TOGETHER_API_KEY
 
-# Primary model — as specified in project requirements.
-IMAGE_MODEL_PRIMARY = "openai/gpt-image-1.5"
+# Primary model — high quality via Together AI.
+IMAGE_MODEL_PRIMARY = "black-forest-labs/FLUX.1.1-pro"
 
 # Fallback model — fast, serverless, always available.
 IMAGE_MODEL_FALLBACK = "black-forest-labs/FLUX.1-schnell"
@@ -177,14 +176,14 @@ def generate_exercise_image(exercise_name: str) -> bytes:
     """
     Generate a demonstration image for the given exercise using Together AI.
 
-    Tries the primary model (openai/gpt-image-1.5) first, then falls back
+    Tries the primary model first, then falls back
     to FLUX.1-schnell if the primary is unavailable.
 
     Args:
         exercise_name: The name of the exercise to illustrate.
 
     Returns:
-        Raw image bytes (PNG/JPEG) ready for display with st.image().
+        Raw image bytes (PNG/JPEG).
 
     Raises:
         EnvironmentError: If TOGETHER_API_KEY is not set.
