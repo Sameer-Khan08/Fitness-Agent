@@ -98,11 +98,13 @@ gunicorn app:app
 
 ```
 trainwise_ai/
-├── app.py                          # Flask entry point
+├── app.py                          # Flask entry point (minimal setup)
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
 ├── README.md
+├── templates/                      # Root Jinja2 HTML templates
+├── static/                         # Root CSS, JS, images
 ├── src/
 │   ├── config/
 │   │   └── settings.py             # Environment variable loader
@@ -121,20 +123,56 @@ trainwise_ai/
 │   │   ├── exercise_library.py     # Curated exercise catalog
 │   │   └── image_prompts.py        # Image generation prompts + Together AI
 │   ├── agents/
-│   │   ├── fitness_agent.py        # Plan generation + AI explanation
+│   │   ├── fitness_agent.py        # Plan generation + AI explanation (injury aware)
 │   │   └── nutrition_agent.py      # Nutrition AI explanation
 │   ├── memory/
 │   │   ├── user_profile_store.py   # In-memory profile storage
 │   │   ├── plan_store.py           # Session-based plan storage
 │   │   ├── checkin_store.py        # Session-based check-in storage
 │   │   └── image_cache.py          # Session-based image cache
+│   ├── core/                       # Core Package (shared helpers)
+│   │   ├── __init__.py
+│   │   ├── constants.py            # General constants
+│   │   └── utils.py                # Utility functions
 │   └── web/
-│       ├── routes.py               # Flask Blueprint routes
-│       ├── forms.py                # Form parsing helpers
-│       ├── helpers.py              # Session management helpers
-│       ├── templates/              # Jinja2 HTML templates
-│       └── static/                 # CSS, JS, images
+│       ├── __init__.py
+│       ├── helpers.py              # Basic session & deployment helpers
+│       ├── forms/                  # Forms Package (separated parsing logic)
+│       │   ├── __init__.py
+│       │   ├── profile_forms.py    # Profile setup parsing
+│       │   └── checkin_forms.py    # Daily check-in parsing
+│       ├── services/               # Services Package (business state wrappers)
+│       │   ├── __init__.py
+│       │   ├── session_interface.py# Custom MemorySessionInterface
+│       │   ├── session_service.py  # Typed session state getters/setters
+│       │   ├── flash_service.py    # Categorized user flash messaging
+│       │   └── api_status_service.py# Third-party integrations state checkers
+│       └── routes/                 # Routes Package (decoupled controllers)
+│           ├── __init__.py         # Web blueprint definition & context processor
+│           ├── main_routes.py      # Root indices and starting over
+│           ├── profile_routes.py   # Profile creation and questionnaires
+│           ├── plan_routes.py      # Workout plan generation & presentation
+│           ├── checkin_routes.py   # Daily physical readiness tracking
+│           ├── nutrition_routes.py # Macro estimation guides
+│           ├── image_routes.py     # Session-bound exercise image generation
+│           └── saved_plan_routes.py# Local workout archives & dashboards
 ```
+
+## Design Mode
+
+To focus on UI/UX layout and styling without relying on external API connections, TrainWise AI includes an offline **Design Mode**.
+
+When `DESIGN_MODE=true` is set in your `.env` file:
+- All external Together AI text and image generation API calls are completely disabled.
+- The sidebar displays neutral, non-scary **Design Mode** statuses for the AI Coach and Exercise Images, and **Local Mode** for the Database.
+- The **AI Coach Explanation** card is pre-populated with a polished preview placeholder.
+- **Exercise Visuals** show a clean placeholder indicating they are disabled in design mode, with the action buttons disabled.
+- Core rule-based planning, safety checks, nutrition targets, and daily readiness check-ins remain fully operational.
+
+To re-enable online AI features:
+1. Set `DESIGN_MODE=false` (or remove the flag).
+2. Set `AI_COACH_ENABLED=true` and `EXERCISE_IMAGES_ENABLED=true`.
+3. Provide a valid `TOGETHER_API_KEY` in your `.env` file.
 
 ## Exercise Images
 

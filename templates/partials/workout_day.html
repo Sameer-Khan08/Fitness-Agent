@@ -1,0 +1,65 @@
+<section class="workout-day-panel {% if day_idx == 0 %}active{% endif %}" id="day-panel-{{ day_idx }}" data-day-panel="{{ day_idx }}" role="tabpanel" aria-labelledby="day-tab-{{ day_idx }}" {% if day_idx != 0 %}style="display: none;" aria-hidden="true"{% else %}aria-hidden="false"{% endif %}>
+    <!-- Workout Overview Card -->
+    <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem; background: rgba(255, 255, 255, 0.02); border-color: rgba(255, 255, 255, 0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <h3 style="margin: 0 0 0.25rem; font-size: 1.4rem; color: var(--text-white);">{{ day_plan.session_type }}</h3>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <span class="badge-neutral status-badge" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">⏱️ {{ day_plan.duration_minutes }} min</span>
+                    {% set intensity = day_plan.intensity|default('Moderate')|lower %}
+                    {% set int_class = 'badge-yellow' %}
+                    {% if intensity == 'low' %}{% set int_class = 'badge-green' %}
+                    {% elif intensity == 'high' %}{% set int_class = 'badge-red' %}{% endif %}
+                    <span class="{{ int_class }} status-badge" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">🔥 {{ day_plan.intensity|default('Moderate')|upper }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            {% if day_plan.session_goal %}
+            <div>
+                <strong style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Goal</strong>
+                <p style="margin: 0; font-size: 0.95rem; font-weight: 500;">{{ day_plan.session_goal }}</p>
+            </div>
+            {% endif %}
+            
+            {% if day_plan.focus %}
+            <div>
+                <strong style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Focus</strong>
+                <p style="margin: 0; font-size: 0.95rem; font-weight: 500;">{{ day_plan.focus }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if day_plan.warm_up %}
+    <div style="margin-bottom: 1.5rem;">
+        <h4 style="margin: 0 0 0.5rem; color: var(--text-white); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;"><span>🏃</span> Warm-Up</h4>
+        <p style="margin: 0; padding-left: 1.75rem; color: var(--text-main); font-size: 0.95rem;">{{ day_plan.warm_up }}</p>
+    </div>
+    {% endif %}
+
+    <section class="exercises-list" aria-label="Programmed exercises">
+        <h4 style="margin: 0 0 1rem; color: var(--text-white); font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Exercises</h4>
+        {% for exercise in day_plan.exercises %}
+            {% set ex_idx = loop.index0 %}
+            {% include 'partials/exercise_card.html' %}
+        {% else %}
+        <p style="color: var(--text-muted); font-style: italic;">No exercises programmed.</p>
+        {% endfor %}
+    </section>
+
+    {% if day_plan.cool_down %}
+    <div style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+        <h4 style="margin: 0 0 0.5rem; color: var(--text-white); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;"><span>🧘</span> Cool-Down</h4>
+        <p style="margin: 0; padding-left: 1.75rem; color: var(--text-main); font-size: 0.95rem;">{{ day_plan.cool_down }}</p>
+    </div>
+    {% endif %}
+
+    {% if day_plan.coaching_note %}
+    <div class="info-box coaching-note" style="border-left: 4px solid var(--accent-cyan);">
+        <strong style="color: var(--text-white); display: block; margin-bottom: 0.25rem;">Coach's Advice:</strong> 
+        <span>{{ day_plan.coaching_note }}</span>
+    </div>
+    {% endif %}
+</section>

@@ -13,39 +13,24 @@
     </nav>
     <div class="sidebar-status" role="region" aria-label="Service Connections">
         <h5>Service Connections</h5>
-        {% if DESIGN_MODE %}
         <div class="status-line">
             <span>AI Coach:</span>
-            <span class="status-info" role="status" aria-label="AI Coach is in Design Mode">Design Mode</span>
-        </div>
-        <div class="status-line">
-            <span>Exercise Images:</span>
-            <span class="status-info" role="status" aria-label="Exercise Images are in Design Mode">Design Mode</span>
-        </div>
-        <div class="status-line">
-            <span>Cloud DB:</span>
-            <span class="status-info" role="status" aria-label="Cloud Database is running in local mode">Local Mode</span>
-        </div>
-        {% else %}
-        <div class="status-line">
-            <span>AI Coach:</span>
-            <span class="{% if api_status.text_ai %}status-ok{% else %}status-warn{% endif %}" role="status" aria-label="AI Coach is {% if api_status.text_ai %}connected{% else %}offline{% endif %}">
-                {% if api_status.text_ai %}Connected{% else %}Offline{% endif %}
+            <span class="{% if api_status.ai_coach == 'Connected' %}status-ok{% elif api_status.ai_coach == 'Design Mode' %}status-info{% else %}status-warn{% endif %}" role="status">
+                {{ api_status.ai_coach }}
             </span>
         </div>
         <div class="status-line">
             <span>Exercise Images:</span>
-            <span class="{% if api_status.images %}status-ok{% else %}status-warn{% endif %}" role="status" aria-label="Exercise Images are {% if api_status.images %}connected{% else %}offline{% endif %}">
-                {% if api_status.images %}Connected{% else %}Offline{% endif %}
+            <span class="{% if api_status.exercise_images == 'Connected' %}status-ok{% elif api_status.exercise_images == 'Design Mode' %}status-info{% else %}status-warn{% endif %}" role="status">
+                {{ api_status.exercise_images }}
             </span>
         </div>
         <div class="status-line">
             <span>Cloud DB:</span>
-            <span class="{% if api_status.supabase %}status-ok{% else %}status-info{% endif %}" role="status" aria-label="Cloud Database is {% if api_status.supabase %}connected in cloud mode{% else %}running in local mode{% endif %}">
-                {% if api_status.supabase %}Connected{% else %}Local Mode{% endif %}
+            <span class="{% if api_status.cloud_db == 'Connected' %}status-ok{% else %}status-info{% endif %}" role="status">
+                {{ api_status.cloud_db }}
             </span>
         </div>
-        {% endif %}
     </div>
     <form action="{{ url_for('web.start_over') }}" method="post" class="sidebar-form">
         <button type="submit" class="btn btn-secondary btn-block btn-sm">Start Over</button>

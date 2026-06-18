@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from 'partials/status_badge.html' import status_badge %}
+{% block title %}Saved Plan — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-title">
+        <h1>Saved Plan</h1>
+        <p>Saved on {{ plan.saved_at|default('Unknown Date') }}</p>
+    </div>
+</section>
+
+{% set safety_status = plan.safety.status|default('review') %}
+<div class="card" style="border-left: 5px solid {% if safety_status == 'green' %}var(--primary-green){% elif safety_status == 'yellow' %}var(--warning-yellow){% else %}var(--danger-red){% endif %}; margin-bottom: var(--spacing-lg);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; color: var(--text-white);">Safety Screening</h3>
+        {{ status_badge(safety_status) }}
+    </div>
+    <p style="margin: 0; font-size: 1.05rem; color: var(--text-main);">{{ plan.safety.summary|default('No summary available.') }}</p>
+</div>
+
+<div class="two-col" style="margin-bottom: var(--spacing-lg);">
+    {% if plan.goal_priorities.priorities %}
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Goal Priorities</h3>
+        <div class="tag-list" style="margin-top: 1rem;">
+            {% for p in plan.goal_priorities.priorities %}
+            <span class="tag">{{ p|upper }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if plan.sport_demands.demands %}
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Sport Demands</h3>
+        <ul style="padding-left: 1.25rem; margin: 1rem 0 0; color: var(--text-main);">
+            {% for d in plan.sport_demands.demands %}
+            <li style="margin-bottom: 0.5rem;">⚡ {{ d|title }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<section class="card weekly-plan" id="exercise-card">
+    <h2 style="margin-top: 0; color: var(--text-white);">Weekly Plan</h2>
+    
+    {% set weekly = plan.weekly_plan|default([]) %}
+    {% if weekly %}
+    <div class="day-tabs" role="tablist" aria-label="Workout Days">
+        {% for day_plan in weekly %}
+        <button type="button" class="day-tab {% if loop.index0 == 0 %}active{% endif %}" id="day-tab-{{ loop.index0 }}" data-day-tab="{{ loop.index0 }}" role="tab" aria-selected="{% if loop.index0 == 0 %}true{% else %}false{% endif %}" aria-controls="day-panel-{{ loop.index0 }}">
+            {{ day_plan.day|default('Day ' ~ loop.index) }}
+        </button>
+        {% endfor %}
+    </div>
+    <div class="day-panels">
+        {% for day_plan in weekly %}
+            {% set day_idx = loop.index0 %}
+            {% include 'partials/workout_day.html' %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-style: italic;">No weekly schedule in this saved plan.</p>
+    {% endif %}
+</section>
+
+<div style="margin-top: 2rem; text-align: center;">
+    <a href="{{ url_for('web.dashboard') }}" class="btn btn-secondary">Back to Saved Plans</a>
+</div>
+{% endblock %}

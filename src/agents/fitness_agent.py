@@ -1,6 +1,7 @@
 import json
 
 from src.planning.workout_builder import build_weekly_plan
+from src.config.settings import DESIGN_MODE
 
 try:
     from src.agents.together_client import generate_together_text
@@ -21,6 +22,17 @@ def generate_ai_plan_explanation(plan: dict) -> str:
     Generate an AI coach explanation for an already-created rule-based plan.
     The AI only explains the plan. It must not replace or override safety logic.
     """
+    if DESIGN_MODE:
+        return """AI Coach Preview
+
+This section will explain why your plan fits your goal, sport, fitness level, and injury status.
+
+In production, the AI Coach will provide:
+- Reality check
+- Training priorities
+- What to avoid
+- How to follow the plan
+- When to seek professional help"""
 
     if not plan:
         return "No plan was found to explain. Generate a training plan first."

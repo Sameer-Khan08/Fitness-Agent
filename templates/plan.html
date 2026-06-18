@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Current Plan — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-title">
+        <h1>Current Plan</h1>
+        <p>Review your profile and generate your athletic training program.</p>
+    </div>
+</section>
+
+{% if session.get('profile') %}
+    {% set profile = session['profile'] %}
+    <div class="card profile-summary">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Athlete Profile Summary</h3>
+        <dl class="profile-grid" style="margin: 0; padding: 0;">
+            <div>
+                <dt class="label">Goal</dt>
+                <dd style="margin: 0; font-weight: 700; font-size: 1.1rem; color: var(--text-white);">{{ profile.main_goal }}</dd>
+            </div>
+            <div>
+                <dt class="label">Sport</dt>
+                <dd style="margin: 0; font-weight: 700; font-size: 1.1rem; color: var(--text-white);">{{ profile.sport }}</dd>
+            </div>
+            <div>
+                <dt class="label">Level</dt>
+                <dd style="margin: 0; font-weight: 700; font-size: 1.1rem; color: var(--text-white);">{{ profile.fitness_level }}</dd>
+            </div>
+            <div>
+                <dt class="label">Days / Week</dt>
+                <dd style="margin: 0; font-weight: 700; font-size: 1.1rem; color: var(--text-white);">{{ profile.training_days_per_week }}</dd>
+            </div>
+            <div>
+                <dt class="label">Pain Rating</dt>
+                <dd style="margin: 0; font-weight: 700; font-size: 1.1rem; color: var(--text-white);">{{ profile.pain_rating }}/10</dd>
+            </div>
+            <div>
+                <dt class="label">Biometrics</dt>
+                <dd style="margin: 0; font-weight: 700; font-size: 1.1rem; color: var(--text-white);">{{ profile.age }}y | {{ profile.height }} | {{ profile.weight }}</dd>
+            </div>
+        </dl>
+    </div>
+
+    <section class="card" style="margin-top: var(--spacing-xl);">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">What TrainWise Will Check</h3>
+        <div class="checks-grid">
+            <div class="metric-card">🎯 Training Goal</div>
+            <div class="metric-card">🏅 Sport Demands</div>
+            <div class="metric-card">⚡ Fitness Level</div>
+            <div class="metric-card">🛡️ Pain/Injury Risk</div>
+        </div>
+    </section>
+
+    <form action="{{ url_for('web.generate_plan') }}" method="post" class="action-form" style="margin-top: var(--spacing-xl);">
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 1.25rem; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.02em;">Generate My Training Plan</button>
+    </form>
+    <a href="{{ url_for('web.onboarding') }}" class="btn btn-secondary btn-block" style="margin-top: var(--spacing-md); font-weight: 700;">Edit Profile</a>
+{% else %}
+    <div class="empty-state">
+        <span class="step-icon" style="font-size: 3rem; margin-bottom: 1rem; display: block;">👤</span>
+        <h3>No profile found.</h3>
+        <p>You need to create your athlete profile before generating a plan.</p>
+        <a href="{{ url_for('web.onboarding') }}" class="btn btn-primary" style="margin-top: var(--spacing-md);">Create Profile</a>
+    </div>
+{% endif %}
+{% endblock %}

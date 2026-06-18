@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from 'partials/status_badge.html' import status_badge %}
+{% block title %}Check-in Result — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-title">
+        <h1>Daily Check-in Result</h1>
+        <p>Your readiness assessment and adjusted workout for today.</p>
+    </div>
+</section>
+
+{% set r_status = readiness.readiness|default('review') %}
+{% set status_color = 'var(--warning-yellow)' %}
+{% set status_bg = 'rgba(255, 223, 0, 0.05)' %}
+{% set status_border = 'rgba(255, 223, 0, 0.2)' %}
+{% if r_status == 'ready' %}
+    {% set status_color = 'var(--primary-green)' %}
+    {% set status_bg = 'rgba(0, 255, 135, 0.05)' %}
+    {% set status_border = 'rgba(0, 255, 135, 0.2)' %}
+{% elif r_status == 'recover' %}
+    {% set status_color = 'var(--danger-red)' %}
+    {% set status_bg = 'rgba(255, 56, 56, 0.05)' %}
+    {% set status_border = 'rgba(255, 56, 56, 0.2)' %}
+{% endif %}
+
+<section class="card" style="text-align: center; border-color: {{ status_color }}; background: {{ status_bg }}; box-shadow: 0 4px 20px {{ status_bg }};" aria-label="Readiness Score">
+    <div style="font-size: 4rem; font-weight: 800; line-height: 1; color: {{ status_color }}; margin-bottom: 0.5rem;">
+        {{ readiness.score|default(0) }}<span style="font-size: 1.5rem; color: var(--text-muted);">/100</span>
+    </div>
+    <div style="margin-bottom: 1.5rem;">
+        {{ status_badge(r_status) }}
+    </div>
+    
+    <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--border-radius-sm); display: inline-block; max-width: 600px; text-align: left;">
+        <p style="margin: 0 0 0.5rem; font-size: 1.1rem;"><strong style="color: var(--text-white);">Recommendation:</strong> {{ readiness.recommendation|default('') }}</p>
+        <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">{{ readiness.summary|default('') }}</p>
+    </div>
+</section>
+
+{% if readiness.modifications or readiness.avoid_today %}
+<section class="card" aria-label="Action Plan">
+    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Action Plan</h3>
+    <div class="two-col" style="margin-top: 1rem;">
+        {% if readiness.modifications %}
+        <div>
+            <h4 style="color: var(--text-white); margin-top: 0;">Modifications</h4>
+            <ul style="padding-left: 1.25rem; color: var(--text-main);">
+                {% for m in readiness.modifications %}
+                <li style="margin-bottom: 0.5rem;">{{ m }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        {% if readiness.avoid_today %}
+        <div style="background: rgba(255, 56, 56, 0.05); padding: 1rem; border-radius: var(--border-radius-sm); border: 1px solid rgba(255, 56, 56, 0.2);">
+            <h4 style="color: var(--danger-red); margin-top: 0;">🚫 Avoid Today</h4>
+            <ul style="padding-left: 1.25rem; margin-bottom: 0; color: var(--text-main);">
+                {% for a in readiness.avoid_today %}
+                <li style="margin-bottom: 0.25rem;">{{ a }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+{% if adjusted_workout %}
+<section class="card" style="padding: 0; border: none; background: transparent; box-shadow: none;">
+    <h3 style="color: var(--text-white);">Today's Adjusted Workout</h3>
+    {% set day_plan = adjusted_workout %}
+    {% set day_idx = 0 %}
+    <div class="day-panels">
+        {% include 'partials/workout_day.html' %}
+    </div>
+</section>
+{% else %}
+<div class="info-box" style="text-align: center; padding: 2rem;">
+    <p style="margin: 0; color: var(--text-muted);">No workout found to adjust or today is a rest day.</p>
+</div>
+{% endif %}
+
+<div class="action-buttons" style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; justify-content: center;">
+    <a href="{{ url_for('web.results') }}" class="btn btn-secondary" style="font-weight: 800;">Back to Results</a>
+    <a href="{{ url_for('web.daily_checkin') }}" class="btn btn-primary" style="font-weight: 800;">New Check-in</a>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — TrainWise AI{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-title">
+        <h1>Saved Plans</h1>
+        <p>View your archived training programs.</p>
+    </div>
+</section>
+
+<section class="card" style="margin-bottom: var(--spacing-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+        <h3 style="margin: 0; color: var(--text-white);">Archived Plans</h3>
+        <span class="status-badge badge-neutral" style="font-size: 0.75rem;">{{ saved_plans|length }} saved</span>
+    </div>
+
+    {% if saved_plans %}
+    <div class="saved-plans-list" style="margin-bottom: 1.5rem; display: grid; gap: 1rem;">
+        {% for plan in saved_plans %}
+        <div class="card" style="margin: 0; padding: 1.25rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+            <div class="saved-plan-info">
+                <h4 style="margin: 0 0 0.25rem; color: var(--text-white);">Plan from {{ plan.saved_at|default('Unknown Date') }}</h4>
+                <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">
+                    Goal: <strong style="color: var(--text-main);">{{ plan.profile_summary.main_goal|default('General') }}</strong> •
+                    Sport: <strong style="color: var(--text-main);">{{ plan.profile_summary.sport|default('None') }}</strong> •
+                    Status: <strong style="color: {% if plan.safety.status == 'green' %}var(--primary-green){% elif plan.safety.status == 'yellow' %}var(--warning-yellow){% else %}var(--danger-red){% endif %};">{{ plan.safety.status|default('Unknown')|title }}</strong>
+                </p>
+            </div>
+            <a href="{{ url_for('web.saved_plan_detail', plan_index=loop.index0) }}" class="btn btn-secondary btn-sm" style="font-weight: 800;">View Plan</a>
+        </div>
+        {% endfor %}
+    </div>
+    <form action="{{ url_for('web.clear_saved_plans') }}" method="post" style="margin: 0; text-align: right;">
+        <button type="submit" class="btn btn-danger btn-sm" style="font-weight: 800;">Delete All Saved Plans</button>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <span class="step-icon" style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">📁</span>
+        <h3 style="margin: 0 0 0.5rem;">No Saved Plans</h3>
+        <p style="margin: 0 0 1rem; color: var(--text-muted);">Generate a fitness plan and click "Save Plan" to archive it here.</p>
+        <a href="{{ url_for('web.onboarding') }}" class="btn btn-primary" style="font-weight: 800;">Build a Workout Plan</a>
+    </div>
+    {% endif %}
+</section>
+ 
+<section class="card">
+    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">System Status</h3>
+    <ul class="checklist" style="margin-top: 0.75rem; list-style: none; padding: 0;">
+        <li style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 0.5rem;">
+            <span style="color: var(--text-main);">AI Coach (Together Text)</span>
+            <span class="status-badge {% if api_status.ai_coach == 'Connected' %}badge-green{% elif api_status.ai_coach == 'Design Mode' %}badge-yellow{% else %}badge-red{% endif %}">
+                {{ api_status.ai_coach }}
+            </span>
+        </li>
+        <li style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 0.5rem;">
+            <span style="color: var(--text-main);">Exercise Visuals (Together Image)</span>
+            <span class="status-badge {% if api_status.exercise_images == 'Connected' %}badge-green{% elif api_status.exercise_images == 'Design Mode' %}badge-yellow{% else %}badge-red{% endif %}">
+                {{ api_status.exercise_images }}
+            </span>
+        </li>
+        <li style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-main);">Cloud Storage</span>
+            <span class="status-badge {% if api_status.cloud_db == 'Connected' %}badge-green{% else %}badge-neutral{% endif %}">
+                {{ api_status.cloud_db }}
+            </span>
+        </li>
+    </ul>
+</section>
+ 
+<div style="margin-top: 2rem; text-align: center;">
+    <a href="{{ url_for('web.onboarding') }}" class="btn btn-primary" style="padding: 1rem 2rem; font-weight: 800;">Generate New Workout Plan</a>
+</div>
+{% endblock %}

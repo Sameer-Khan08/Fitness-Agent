@@ -6,6 +6,8 @@ Exposes rule-based nutrition guidance and Together AI nutrition explanation func
 
 import json
 
+from src.config.settings import DESIGN_MODE
+
 try:
     from src.nutrition.nutrition_engine import estimate_nutrition_targets
 except ImportError:
@@ -74,6 +76,17 @@ def generate_nutrition_ai_explanation(
     Generate an AI explanation for nutrition guidance using Together AI.
     The AI only explains the rule-based nutrition result.
     """
+    if DESIGN_MODE:
+        return """AI Nutrition Coach Preview
+
+This section will explain how your protein targets, baseline hydration, and calories map to your overall fitness goal.
+
+In production, the AI Nutrition Coach will provide:
+- Estimated calorie targets breakdown
+- Macro distribution recommendations
+- Pre/Post workout meal advice
+- Meal timing strategies"""
+
     # Robustly handle if arguments are swapped or passed as (profile, nutrition)
     if nutrition and not profile:
         if "main_goal" in nutrition or "gender" in nutrition or "age" in nutrition:
