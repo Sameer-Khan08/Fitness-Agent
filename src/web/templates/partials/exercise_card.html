@@ -56,7 +56,7 @@
     <div class="image-container">
         {% set cached = get_cached_image(exercise.name) %}
         {% if cached %}
-            <img src="{{ cached }}" alt="Demo for {{ exercise.name|title }}" class="demo-image">
+            <img src="{{ cached }}" alt="Image for {{ exercise.name|title }}" class="demo-image">
             <span class="image-warning" style="margin-top: 0.5rem; text-align: center; font-size: 0.8rem; color: var(--text-muted);">AI-generated exercise images may be imperfect. Follow written instructions.</span>
         {% else %}
             <div class="image-placeholder-box">
@@ -68,15 +68,15 @@
         <div style="width: 100%; max-width: 380px; margin-top: 0.75rem;">
             {% if images_available %}
                 {% if cached %}
-                    <button class="btn btn-secondary btn-block btn-sm" disabled style="margin: 0;">Demo Image Generated</button>
+                    <button class="btn btn-secondary btn-block btn-sm" disabled style="margin: 0;">Exercise Image Generated</button>
                 {% elif image_limit_reached %}
                     <span class="warning-inline" style="display: block; text-align: center; margin-bottom: 0.25rem; font-size: 0.8rem; color: var(--warning-yellow);">Session limit reached (max 5 images).</span>
-                    <button class="btn btn-secondary btn-block btn-sm" disabled style="margin: 0;">Generate Demo Image</button>
+                    <button class="btn btn-secondary btn-block btn-sm" disabled style="margin: 0;">Generate Exercise Image</button>
                 {% else %}
                     <form action="{{ url_for('web.generate_exercise_image_route') }}" method="post" style="display: block; width: 100%; margin: 0;">
                         <input type="hidden" name="day_idx" value="{{ day_idx }}">
                         <input type="hidden" name="ex_idx" value="{{ ex_idx }}">
-                        <button type="submit" class="btn btn-secondary btn-block btn-sm" style="margin: 0;">Generate Demo Image</button>
+                        <button type="submit" class="btn btn-secondary btn-block btn-sm" style="margin: 0;">Generate Exercise Image</button>
                     </form>
                 {% endif %}
             {% else %}

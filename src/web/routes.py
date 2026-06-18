@@ -16,7 +16,7 @@ from src.memory.plan_store import clear_saved_plans_local, get_saved_plans_local
 from src.nutrition.nutrition_engine import estimate_nutrition_targets
 from src.planning.readiness_engine import calculate_readiness
 from src.planning.workout_adjuster import adjust_workout_for_readiness
-from src.web.forms import DEMO_PROFILES, parse_checkin_form, parse_onboarding_form
+from src.web.forms import parse_checkin_form, parse_onboarding_form
 from src.web.helpers import (
     clear_current_workflow,
     get_api_status,
@@ -70,14 +70,7 @@ def onboarding():
     return render_template("onboarding.html")
 
 
-@web_bp.route("/load-demo-profile/<demo_type>", methods=["POST"])
-def load_demo_profile(demo_type):
-    if demo_type not in DEMO_PROFILES:
-        flash("Unknown demo profile.", "error")
-        return redirect(url_for("web.onboarding"))
-    set_session_value("profile", dict(DEMO_PROFILES[demo_type]))
-    flash(f"Loaded demo profile: {demo_type.replace('_', ' ').title()}", "success")
-    return redirect(url_for("web.plan"))
+
 
 
 @web_bp.route("/plan")
@@ -341,7 +334,7 @@ def generate_exercise_image_route():
     if result.get("success") and result.get("image_url"):
         save_cached_image(exercise_name, result["image_url"])
         set_session_value("generated_image_count", count + 1)
-        flash("Demo image generated.", "success")
+        flash("Exercise image generated.", "success")
     else:
         flash(f"Image generation failed: {result.get('error', 'Unknown error')}", "error")
 

@@ -16,7 +16,6 @@ AI-powered fitness and athletic performance coaching platform. Generates persona
 - **Readiness-Based Workout Adjustment** — Automatically modifies today's workout based on check-in results
 - **Nutrition Guidance** — Calorie targets (Mifflin-St Jeor), protein ranges, hydration, meal structure
 - **Saved Plans & Dashboard** — Archive generated plans for reference; view API/deployment status
-- **Demo Profiles** — Pre-built test profiles (athlete, weight loss, groin pain, red flag back pain)
 
 ## Safety Disclaimer
 
@@ -135,17 +134,7 @@ trainwise_ai/
 │       ├── helpers.py              # Session management helpers
 │       ├── templates/              # Jinja2 HTML templates
 │       └── static/                 # CSS, JS, images
-└── scripts/
-    └── smoke_test.py               # Automated smoke tests
 ```
-
-## Smoke Tests
-
-```bash
-python scripts/smoke_test.py
-```
-
-Tests cover: green/yellow/red plan generation, nutrition estimation, readiness scoring, and image prompt generation.
 
 ## Current Limitations
 

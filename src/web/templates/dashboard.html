@@ -53,7 +53,7 @@
             </span>
         </li>
         <li style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-            <span>Demo Images (Together AI Images):</span>
+            <span>Exercise Images (Together AI Images):</span>
             <span class="{% if api_status.images %}status-ok{% else %}status-warn{% endif %}" style="font-weight: 700;">
                 {% if api_status.images %}Configured{% else %}Missing (offline mode){% endif %}
             </span>
@@ -75,7 +75,7 @@
         <li style="padding: 0.25rem 0;">{% if checklist.readme %}🟢{% else %}🔴{% endif %} README.md documentation check</li>
         <li style="padding: 0.25rem 0;">🟢 Core rule-based fitness planner works without active API keys</li>
         <li style="padding: 0.25rem 0;">{% if checklist.text_ai %}🟢{% else %}🟡{% endif %} Together AI Text Coaching: {% if checklist.text_ai %}Enabled{% else %}Disabled{% endif %}</li>
-        <li style="padding: 0.25rem 0;">{% if checklist.images %}🟢{% else %}🟡{% endif %} Together AI Demo Images: {% if checklist.images %}Enabled{% else %}Disabled{% endif %}</li>
+        <li style="padding: 0.25rem 0;">{% if checklist.images %}🟢{% else %}🟡{% endif %} Together AI Exercise Images: {% if checklist.images %}Enabled{% else %}Disabled{% endif %}</li>
         <li style="padding: 0.25rem 0;">{% if checklist.supabase %}🟢{% else %}🔵{% endif %} Supabase Cloud Storage: {% if checklist.supabase %}Connected{% else %}Local Mode{% endif %}</li>
     </ul>
 </details>
