@@ -91,32 +91,47 @@ def plan():
 
 @web_bp.route("/generate-plan", methods=["POST"])
 def generate_plan():
-    profile = get_current_profile()
+    profile = session.get("profile")
+    
+    print("GENERATE PLAN ROUTE HIT")
+    print("PROFILE:", profile)
+
     if not profile:
-        flash("Profile missing. Please complete onboarding.", "error")
+        flash("No profile found. Complete profile setup first.", "warning")
         return redirect(url_for("web.onboarding"))
+
     try:
-        plan = generate_fitness_plan(profile)
-        set_session_value("results", plan)
-        set_session_value("ai_explanation", None)
-        flash("Training plan generated successfully.", "success")
+        results = generate_fitness_plan(profile)
+        
+        print("RESULT KEYS:", results.keys() if isinstance(results, dict) else type(results))
+
+        if not results or not results.get("weekly_plan"):
+            flash("Plan generation failed. Please check your profile and try again.", "warning")
+            return redirect(url_for("web.plan"))
+
+        session["results"] = results
+        session["ai_explanation"] = None
+        session.modified = True
+
+        return redirect(url_for("web.results"))
+
     except Exception as e:
-        flash(f"Plan generation failed: {e}", "error")
+        flash(f"Plan generation failed: {str(e)}", "error")
         return redirect(url_for("web.plan"))
-    return redirect(url_for("web.results"))
 
 
 @web_bp.route("/results")
 def results():
-    profile = get_current_profile()
-    plan = get_current_results()
-    if not profile or not plan:
+    results = session.get("results")
+    profile = session.get("profile")
+
+    if not results:
         flash("No active plan found. Generate a plan first.", "warning")
-        return redirect(url_for("web.plan") if profile else url_for("web.onboarding"))
+        return redirect(url_for("web.plan"))
 
     image_limit_reached = session.get("generated_image_count", 0) >= 5
     exercise_prompts = {}
-    weekly = plan.get("weekly_plan", [])
+    weekly = results.get("weekly_plan", [])
     for day_idx, day_plan in enumerate(weekly):
         for ex_idx, exercise in enumerate(day_plan.get("exercises", [])):
             name = exercise.get("name", "Exercise")
@@ -125,7 +140,8 @@ def results():
     return render_template(
         "results.html",
         profile=profile,
-        plan=plan,
+        plan=results,
+        results=results,
         ai_explanation=session.get("ai_explanation"),
         text_ai_available=bool(TEXT_AI_ENABLED),
         images_available=bool(IMAGE_AI_ENABLED),

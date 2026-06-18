@@ -19,8 +19,8 @@ from together import Together
 
 from src.config.settings import TOGETHER_API_KEY
 
-# Primary model — high quality via Together AI.
-IMAGE_MODEL_PRIMARY = "black-forest-labs/FLUX.1.1-pro"
+# Primary model — as specified in project requirements.
+IMAGE_MODEL_PRIMARY = "openai/gpt-image-1.5"
 
 # Fallback model — fast, serverless, always available.
 IMAGE_MODEL_FALLBACK = "black-forest-labs/FLUX.1-schnell"
