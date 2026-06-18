@@ -2,77 +2,85 @@
 {% from 'partials/status_badge.html' import status_badge %}
 {% block title %}Your Plan — TrainWise AI{% endblock %}
 {% block content %}
+<!-- 1. Page Header -->
 <section class="page-hero">
     <div class="page-hero-title">
-        <h1>Current Plan</h1>
-        <p>Your customized training plan from your goals, sport, and safety screening.</p>
+        <h1>Your Training Plan</h1>
+        <p>Goal: {{ profile.main_goal }} • Sport: {{ profile.sport }} • Level: {{ profile.fitness_level }}</p>
     </div>
 </section>
 
-<!-- 1. Reality Check -->
+<!-- 2. Reality Check Card -->
 {% set safety = plan.safety %}
 {% set medical = plan.medical %}
 {% set safety_status = safety.status|default('yellow') %}
 
-<div class="alert alert-{{ safety_status }}">
-    {% if safety_status == 'green' %}
-    <strong>Safe to Train:</strong> {{ safety.summary }}
-    {% elif safety_status == 'yellow' %}
-    <strong>Modify Training:</strong> {{ safety.summary }}
-    {% else %}
-    <strong>Training Capped:</strong> {{ safety.summary }}
+<div class="card" style="border-left: 5px solid {% if safety_status == 'green' %}var(--primary-green){% elif safety_status == 'yellow' %}var(--warning-yellow){% else %}var(--danger-red){% endif %};">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; color: var(--text-white);">Reality Check</h3>
+        {{ status_badge(safety_status) }}
+    </div>
+    
+    <p style="font-size: 1.05rem; margin-bottom: 1rem; color: var(--text-main);">{{ safety.summary }}</p>
+
+    {% if safety.avoid %}
+    <div style="background: rgba(255, 56, 56, 0.05); padding: 0.75rem; border-radius: var(--border-radius-sm); border: 1px solid rgba(255, 56, 56, 0.2); margin-bottom: 1rem;">
+        <strong style="color: var(--danger-red); display: block; margin-bottom: 0.5rem;">What to Avoid:</strong>
+        <ul style="margin: 0; padding-left: 1.25rem; color: var(--text-muted);">
+            {% for item in safety.avoid %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if medical.has_red_flags %}
+    <div class="alert alert-red" style="margin-bottom: 0;">
+        <strong>Medical Alert:</strong> {{ medical.message }}
+        {% for flag in medical.flags %}
+        <p style="margin: 0.25rem 0 0;">⚠️ {{ flag }}</p>
+        {% endfor %}
+    </div>
     {% endif %}
 </div>
 
-{% if medical.has_red_flags %}
-<div class="alert alert-red">
-    <strong>Medical Alert:</strong> {{ medical.message }}
-    {% for flag in medical.flags %}
-    <p style="margin: 0.25rem 0 0;">⚠️ {{ flag }}</p>
-    {% endfor %}
-</div>
-{% endif %}
+<!-- 3. Quick Action Row -->
+<section class="card" style="padding: var(--spacing-md);" aria-label="Quick Actions">
+    <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+        <form action="{{ url_for('web.generate_ai_explanation') }}" method="post" style="margin: 0;">
+            <button type="submit" class="btn btn-primary" style="font-weight: 800; padding: 0.85rem 1.5rem;" {% if not text_ai_available %}disabled title="Together API key missing"{% endif %}>Generate AI Coach Explanation</button>
+        </form>
+        <a href="{{ url_for('web.daily_checkin') }}" class="btn btn-secondary" style="font-weight: 800; padding: 0.85rem 1.5rem;">Daily Check-in</a>
+        <a href="{{ url_for('web.nutrition') }}" class="btn btn-secondary" style="font-weight: 800; padding: 0.85rem 1.5rem;">View Nutrition Guidance</a>
+        <form action="{{ url_for('web.save_plan') }}" method="post" style="margin: 0;">
+            <button type="submit" class="btn btn-secondary" style="font-weight: 800; padding: 0.85rem 1.5rem;">Save Plan</button>
+        </form>
+    </div>
+</section>
 
-<!-- 2. AI Coach Explanation -->
+<!-- 4. AI Coach Explanation Card -->
 {% if ai_explanation %}
 <div class="card ai-explanation">
     <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">AI Coach Explanation</h3>
     <pre style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text-main); line-height: 1.7; white-space: pre-wrap; background: #05070a; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin: 0.5rem 0 0;">{{ ai_explanation }}</pre>
 </div>
 {% elif text_ai_available %}
-<div class="card" style="text-align: center; padding: var(--spacing-lg);">
-    <h3 style="margin-top: 0; color: var(--text-white);">AI Coach Analysis</h3>
-    <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.95rem;">Get a detailed breakdown and safety explanation of your weekly plan from your Together AI Coach.</p>
-    <form action="{{ url_for('web.generate_ai_explanation') }}" method="post">
-        <button type="submit" class="btn btn-primary">Generate AI Coach Explanation</button>
-    </form>
-</div>
-{% else %}
-<div class="card" style="text-align: center; padding: var(--spacing-lg); border-style: dashed;">
-    <h3 style="margin-top: 0; color: var(--text-white);">AI Coach Analysis</h3>
-    <p style="color: var(--text-muted); margin: 0; font-size: 0.95rem; font-style: italic;">AI Coach is Offline (Together API key is missing).</p>
+<div class="empty-state" style="margin-bottom: var(--spacing-lg);">
+    <span class="step-icon" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;">🤖</span>
+    <h4 style="margin: 0 0 0.5rem; color: var(--text-white);">AI Explanation Not Generated</h4>
+    <p style="margin: 0; font-size: 0.9rem;">Click "Generate AI Coach Explanation" above to get a detailed breakdown.</p>
 </div>
 {% endif %}
 
-<!-- 3. Goal & Sport Summary -->
-<div class="summary-metrics">
-    <div class="metric-card"><span class="label">Status</span>{{ status_badge(safety_status) }}</div>
-    <div class="metric-card"><span class="label">Goal</span><strong>{{ profile.main_goal }}</strong></div>
-    <div class="metric-card"><span class="label">Sport</span><strong>{{ profile.sport }}</strong></div>
-    <div class="metric-card"><span class="label">Days / Wk</span><strong>{{ profile.training_days_per_week }}</strong></div>
-    <div class="metric-card"><span class="label">Pain</span><strong>{{ profile.pain_rating }}/10</strong></div>
-</div>
-
-<!-- 4. Weekly Plan -->
+<!-- 5. Weekly Plan -->
 <section class="card weekly-plan" id="exercise-card">
     <h2 style="margin-top: 0; color: var(--text-white);">Weekly Plan</h2>
-    <p class="subtitle" style="margin-bottom: 1.5rem;">Select a day to view the workout.</p>
-
+    
     {% set weekly = plan.weekly_plan|default([]) %}
     {% if weekly %}
-    <div class="day-tabs" role="tablist">
+    <div class="day-tabs" role="tablist" aria-label="Workout Days">
         {% for day_plan in weekly %}
-        <button type="button" class="day-tab {% if loop.index0 == 0 %}active{% endif %}" data-day-tab="{{ loop.index0 }}" role="tab">
+        <button type="button" class="day-tab {% if loop.index0 == 0 %}active{% endif %}" id="day-tab-{{ loop.index0 }}" data-day-tab="{{ loop.index0 }}" role="tab" aria-selected="{% if loop.index0 == 0 %}true{% else %}false{% endif %}" aria-controls="day-panel-{{ loop.index0 }}">
             {{ day_plan.day|default('Day ' ~ loop.index) }}
         </button>
         {% endfor %}
@@ -88,32 +96,23 @@
     {% endif %}
 </section>
 
-<!-- 5. Notes -->
-{% if plan.notes or safety.recommendations or safety.avoid %}
+<!-- 6. Notes and disclaimer -->
+{% if plan.notes or safety.recommendations %}
 <details class="card" open>
     <summary>Coach Notes &amp; Recommendations</summary>
     <div style="margin-top: 1rem;">
         {% if safety.recommendations %}
         <h4 style="color: var(--text-white); margin-bottom: 0.5rem;">Recommendations</h4>
-        <ul style="padding-left: 1.25rem; margin: 0 0 1rem 0;">
+        <ul style="padding-left: 1.25rem; margin: 0 0 1rem 0; color: var(--text-muted);">
             {% for rec in safety.recommendations %}
             <li style="margin-bottom: 0.25rem;">{{ rec }}</li>
             {% endfor %}
         </ul>
         {% endif %}
 
-        {% if safety.avoid %}
-        <h4 style="color: var(--text-white); margin-bottom: 0.5rem;">What to Avoid</h4>
-        <ul class="avoid-list" style="padding-left: 1.25rem; margin: 0 0 1rem 0; list-style-type: none;">
-            {% for item in safety.avoid %}
-            <li style="margin-bottom: 0.25rem; color: var(--danger-red);">⚠️ Avoid {{ item }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-
         {% if plan.notes %}
         <h4 style="color: var(--text-white); margin-bottom: 0.5rem;">Training Tips</h4>
-        <ul style="padding-left: 1.25rem; margin: 0;">
+        <ul style="padding-left: 1.25rem; margin: 0; color: var(--text-muted);">
             {% for note in plan.notes %}
             <li style="margin-bottom: 0.25rem;">{{ note }}</li>
             {% endfor %}
@@ -123,16 +122,7 @@
 </details>
 {% endif %}
 
-<!-- 6. Medical Disclaimer -->
 <div class="disclaimer-box" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
     <strong>Disclaimer:</strong> This training program is rule-based guidance generated from user inputs. It is for educational and general fitness purposes only. TrainWise AI does not diagnose injuries or prescribe medical treatments. If you experience severe, sharp, or worsening pain, consult a medical professional immediately.
-</div>
-
-<div class="action-buttons" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 1.5rem;">
-    <form action="{{ url_for('web.save_plan') }}" method="post" style="display: contents;">
-        <button type="submit" class="btn btn-primary btn-block" style="margin: 0;">Save Plan</button>
-    </form>
-    <a href="{{ url_for('web.daily_checkin') }}" class="btn btn-primary btn-block" style="margin: 0;">Daily Check-in</a>
-    <a href="{{ url_for('web.onboarding') }}" class="btn btn-secondary" style="margin: 0;">Edit Profile</a>
 </div>
 {% endblock %}

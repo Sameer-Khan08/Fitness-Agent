@@ -40,9 +40,11 @@ web_bp = Blueprint(
 @web_bp.context_processor
 def inject_globals():
     from src.memory.image_cache import get_cached_image
+    from src.config.settings import DESIGN_MODE
     return {
         "api_status": get_api_status(),
         "get_cached_image": get_cached_image,
+        "DESIGN_MODE": DESIGN_MODE,
     }
 
 
@@ -150,6 +152,23 @@ def generate_ai_explanation():
     if not plan:
         flash("No plan to explain. Generate a plan first.", "warning")
         return redirect(url_for("web.plan"))
+    
+    from src.config.settings import DESIGN_MODE
+    if DESIGN_MODE:
+        explanation = """AI Coach Preview
+
+This section will explain why your plan fits your goal, sport, fitness level, and injury status.
+
+In production, the AI Coach will provide:
+- Reality check
+- Training priorities
+- What to avoid
+- How to follow the plan
+- When to seek professional help"""
+        set_session_value("ai_explanation", explanation)
+        flash("AI coach explanation generated in Design Mode.", "success")
+        return redirect(url_for("web.results"))
+
     if not TEXT_AI_ENABLED:
         flash("AI explanation unavailable: No text AI API key is configured.", "warning")
         return redirect(url_for("web.results"))
@@ -227,6 +246,22 @@ def generate_nutrition_ai_explanation_route():
         return redirect(url_for("web.onboarding"))
     nutrition_result = session.get("nutrition_result") or estimate_nutrition_targets(profile)
     set_session_value("nutrition_result", nutrition_result)
+    
+    from src.config.settings import DESIGN_MODE
+    if DESIGN_MODE:
+        explanation = """AI Nutrition Coach Preview
+
+This section will explain how your protein targets, baseline hydration, and calories map to your overall fitness goal.
+
+In production, the AI Nutrition Coach will provide:
+- Estimated calorie targets breakdown
+- Macro distribution recommendations
+- Pre/Post workout meal advice
+- Meal timing strategies"""
+        set_session_value("nutrition_ai_explanation", explanation)
+        flash("Nutrition AI explanation generated in Design Mode.", "success")
+        return redirect(url_for("web.nutrition"))
+
     if not TEXT_AI_ENABLED:
         flash("AI explanation unavailable: No text AI API key is configured.", "warning")
         return redirect(url_for("web.nutrition"))
@@ -303,6 +338,11 @@ def generate_exercise_image_route():
     except (TypeError, ValueError):
         flash("Invalid exercise reference.", "error")
         return redirect(url_for("web.results"))
+
+    from src.config.settings import DESIGN_MODE
+    if DESIGN_MODE:
+        flash("Exercise image generation is disabled in design mode.", "info")
+        return redirect(url_for("web.results") + f"#exercise-{day_idx}-{ex_idx}")
 
     weekly = plan.get("weekly_plan", [])
     if day_idx < 0 or day_idx >= len(weekly):

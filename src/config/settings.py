@@ -31,8 +31,17 @@ FLASK_SECRET_KEY = get_setting("FLASK_SECRET_KEY", "trainwise-dev-secret-change-
 
 DATABASE_URL = get_setting("CONNECTION_STRING") or get_setting("DATABASE_URL")
 
-TEXT_AI_ENABLED = bool(TOGETHER_API_KEY)
-IMAGE_AI_ENABLED = bool(TOGETHER_API_KEY or IMAGE_MODEL_API_KEY)
+# Design/development feature flag system
+DESIGN_MODE = get_setting("DESIGN_MODE", "false").lower() in ("true", "1", "yes")
 
-AI_COACH_PROVIDER = "Together AI" if TOGETHER_API_KEY else "Offline"
-IMAGE_PROVIDER = "Together AI" if TOGETHER_API_KEY or IMAGE_MODEL_API_KEY else "Offline"
+default_coach_enabled = "false" if DESIGN_MODE else "true"
+default_images_enabled = "false" if DESIGN_MODE else "true"
+
+AI_COACH_ENABLED = get_setting("AI_COACH_ENABLED", default_coach_enabled).lower() in ("true", "1", "yes")
+EXERCISE_IMAGES_ENABLED = get_setting("EXERCISE_IMAGES_ENABLED", default_images_enabled).lower() in ("true", "1", "yes")
+
+TEXT_AI_ENABLED = bool(TOGETHER_API_KEY) and AI_COACH_ENABLED
+IMAGE_AI_ENABLED = bool(TOGETHER_API_KEY or IMAGE_MODEL_API_KEY) and EXERCISE_IMAGES_ENABLED
+
+AI_COACH_PROVIDER = "Together AI" if TEXT_AI_ENABLED else ("Design Mode" if DESIGN_MODE else "Offline")
+IMAGE_PROVIDER = "Together AI" if IMAGE_AI_ENABLED else ("Design Mode" if DESIGN_MODE else "Offline")

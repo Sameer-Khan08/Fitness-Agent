@@ -9,45 +9,47 @@
     </div>
 </section>
 
-<div class="card">
-    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Safety Screening</h3>
-    <div style="margin-top: 0.75rem;">
-        <span style="display: inline-block; margin-bottom: 0.5rem;">{{ status_badge(plan.safety.status|default('review')) }}</span>
-        <p style="margin: 0; font-size: 0.95rem;">{{ plan.safety.summary|default('No summary available.') }}</p>
+{% set safety_status = plan.safety.status|default('review') %}
+<div class="card" style="border-left: 5px solid {% if safety_status == 'green' %}var(--primary-green){% elif safety_status == 'yellow' %}var(--warning-yellow){% else %}var(--danger-red){% endif %}; margin-bottom: var(--spacing-lg);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; color: var(--text-white);">Safety Screening</h3>
+        {{ status_badge(safety_status) }}
     </div>
+    <p style="margin: 0; font-size: 1.05rem; color: var(--text-main);">{{ plan.safety.summary|default('No summary available.') }}</p>
 </div>
 
-{% if plan.goal_priorities.priorities %}
-<div class="card">
-    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Goal Priorities</h3>
-    <div class="tag-list" style="margin-top: 0.75rem;">
-        {% for p in plan.goal_priorities.priorities %}
-        <span class="tag">{{ p|upper }}</span>
-        {% endfor %}
+<div class="two-col" style="margin-bottom: var(--spacing-lg);">
+    {% if plan.goal_priorities.priorities %}
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Goal Priorities</h3>
+        <div class="tag-list" style="margin-top: 1rem;">
+            {% for p in plan.goal_priorities.priorities %}
+            <span class="tag">{{ p|upper }}</span>
+            {% endfor %}
+        </div>
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-{% if plan.sport_demands.demands %}
-<div class="card">
-    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Sport Demands</h3>
-    <ul style="padding-left: 1.25rem; margin: 0.75rem 0 0 0;">
-        {% for d in plan.sport_demands.demands %}
-        <li style="margin-bottom: 0.25rem; font-size: 0.95rem;">⚡ {{ d|title }}</li>
-        {% endfor %}
-    </ul>
+    {% if plan.sport_demands.demands %}
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Sport Demands</h3>
+        <ul style="padding-left: 1.25rem; margin: 1rem 0 0; color: var(--text-main);">
+            {% for d in plan.sport_demands.demands %}
+            <li style="margin-bottom: 0.5rem;">⚡ {{ d|title }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
 
-<section class="card weekly-plan">
+<section class="card weekly-plan" id="exercise-card">
     <h2 style="margin-top: 0; color: var(--text-white);">Weekly Plan</h2>
-    <p class="subtitle" style="margin-bottom: 1.5rem;">Select a day to view the workout from this plan.</p>
-
+    
     {% set weekly = plan.weekly_plan|default([]) %}
     {% if weekly %}
-    <div class="day-tabs" role="tablist">
+    <div class="day-tabs" role="tablist" aria-label="Workout Days">
         {% for day_plan in weekly %}
-        <button type="button" class="day-tab {% if loop.index0 == 0 %}active{% endif %}" data-day-tab="{{ loop.index0 }}" role="tab">
+        <button type="button" class="day-tab {% if loop.index0 == 0 %}active{% endif %}" id="day-tab-{{ loop.index0 }}" data-day-tab="{{ loop.index0 }}" role="tab" aria-selected="{% if loop.index0 == 0 %}true{% else %}false{% endif %}" aria-controls="day-panel-{{ loop.index0 }}">
             {{ day_plan.day|default('Day ' ~ loop.index) }}
         </button>
         {% endfor %}
@@ -59,11 +61,11 @@
         {% endfor %}
     </div>
     {% else %}
-    <p>No weekly schedule in this saved plan.</p>
+    <p style="color: var(--text-muted); font-style: italic;">No weekly schedule in this saved plan.</p>
     {% endif %}
 </section>
 
-<div style="margin-top: 1.5rem;">
-    <a href="{{ url_for('web.dashboard') }}" class="btn btn-secondary btn-block">Back to Dashboard</a>
+<div style="margin-top: 2rem; text-align: center;">
+    <a href="{{ url_for('web.dashboard') }}" class="btn btn-secondary">Back to Saved Plans</a>
 </div>
 {% endblock %}

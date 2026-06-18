@@ -8,62 +8,79 @@
     </div>
 </section>
 
-<div class="metrics-row">
-    <div class="metric-card">
-        <span class="label">Estimated Maintenance</span>
-        <strong style="font-size: 1.3rem; color: var(--accent-cyan);">{% if nutrition.maintenance_calories %}{{ nutrition.maintenance_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
+<dl class="metrics-row" style="margin-bottom: var(--spacing-lg); padding: 0; list-style: none;">
+    <div class="metric-card" style="border-top: 3px solid var(--accent-cyan);">
+        <dt class="label">Estimated Maintenance</dt>
+        <dd style="margin: 0;"><strong style="font-size: 1.5rem; color: var(--text-white);">{% if nutrition.maintenance_calories %}{{ nutrition.maintenance_calories }} <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">kcal/day</span>{% else %}Unavailable{% endif %}</strong></dd>
+    </div>
+    <div class="metric-card" style="border-top: 3px solid var(--primary-green);">
+        <dt class="label">Daily Target</dt>
+        <dd style="margin: 0;"><strong style="font-size: 1.5rem; color: var(--primary-green);">{% if nutrition.target_calories %}{{ nutrition.target_calories }} <span style="font-size: 0.9rem; font-weight: normal;">kcal/day</span>{% else %}Unavailable{% endif %}</strong></dd>
     </div>
     <div class="metric-card">
-        <span class="label">Daily Target</span>
-        <strong style="font-size: 1.3rem; color: var(--primary-green);">{% if nutrition.target_calories %}{{ nutrition.target_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
+        <dt class="label">Protein Target</dt>
+        <dd style="margin: 0;"><strong style="font-size: 1.3rem; color: var(--text-white);">{{ nutrition.protein_range_g|default('—') }}</strong></dd>
     </div>
-</div>
-
-<div class="card">
-    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Macronutrients &amp; Hydration</h3>
-    <p style="margin: 0.75rem 0 0.5rem;">🍗 <strong>Protein Target:</strong> <span style="color: var(--accent-cyan); font-weight: 600;">{{ nutrition.protein_range_g|default('—') }}</span></p>
-    <p style="margin: 0;">💧 <strong>Hydration:</strong> <span style="color: var(--accent-cyan); font-weight: 600;">{{ nutrition.hydration|default('—') }}</span></p>
-</div>
-
-<div class="card">
-    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Meal Structure Guidelines</h3>
-    <ul style="padding-left: 1.25rem; margin: 0.75rem 0 0;">
-        {% for item in nutrition.meal_structure|default([]) %}
-        <li style="margin-bottom: 0.4rem;">{{ item }}</li>
-        {% else %}
-        <li>No meal structure guidelines available.</li>
-        {% endfor %}
-    </ul>
-</div>
-
-{% if nutrition.notes %}
-<div class="card">
-    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Coach Notes</h3>
-    <div style="margin-top: 0.75rem;">
-        {% for note in nutrition.notes %}
-        <p class="info-inline" style="display: block; margin: 0.4rem 0;">👉 {{ note }}</p>
-        {% endfor %}
+    <div class="metric-card">
+        <dt class="label">Hydration</dt>
+        <dd style="margin: 0;"><strong style="font-size: 1.1rem; color: var(--text-white);">{{ nutrition.hydration|default('—') }}</strong></dd>
     </div>
-</div>
-{% endif %}
+</dl>
 
-<div class="card">
-    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">AI Nutrition Explanation</h3>
-    {% if ai_explanation %}
-    <pre style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text-main); line-height: 1.7; white-space: pre-wrap; background: #05070a; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin: 0.75rem 0 0;">{{ ai_explanation }}</pre>
-    {% elif text_ai_available %}
-    <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.95rem;">Generate an AI breakdown and guide for your rule-based nutrition recommendations.</p>
-    <form action="{{ url_for('web.generate_nutrition_ai_explanation_route') }}" method="post" style="margin: 0;">
-        <button type="submit" class="btn btn-primary">Generate AI Explanation</button>
-    </form>
+<div class="two-col" style="margin-bottom: var(--spacing-lg);">
+    <section class="card" style="margin-bottom: 0;">
+        <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Meal Structure</h3>
+        <ul style="padding-left: 1.25rem; margin: 1rem 0 0; color: var(--text-main);">
+            {% for item in nutrition.meal_structure|default([]) %}
+            <li style="margin-bottom: 0.5rem;">{{ item }}</li>
+            {% else %}
+            <li style="color: var(--text-muted); font-style: italic;">No meal structure guidelines available.</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    {% if nutrition.notes %}
+    <section class="card" style="margin-bottom: 0; border-left: 4px solid var(--warning-yellow);">
+        <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Coach Notes & Warnings</h3>
+        <ul style="padding-left: 1.25rem; margin: 1rem 0 0; color: var(--text-main);">
+            {% for note in nutrition.notes %}
+            <li style="margin-bottom: 0.5rem;">{{ note }}</li>
+            {% endfor %}
+        </ul>
+    </section>
     {% else %}
-    <p class="info-inline" style="display: block; margin-top: 0.75rem;">AI explanation unavailable — Together AI API key not configured.</p>
+    <section class="card" style="margin-bottom: 0;">
+        <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Coach Notes</h3>
+        <p style="color: var(--text-muted); font-style: italic; margin-top: 1rem;">No specific notes for your profile.</p>
+    </section>
     {% endif %}
 </div>
 
-<div class="action-buttons">
-    <a href="{{ url_for('web.results') if session.get('results') else url_for('web.plan') }}" class="btn btn-secondary">Fitness Plan</a>
-    <a href="{{ url_for('web.daily_checkin') }}" class="btn btn-secondary">Daily Check-in</a>
-    <a href="{{ url_for('web.dashboard') }}" class="btn btn-secondary">Saved Plans</a>
+{% if ai_explanation %}
+<section class="card ai-explanation">
+    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">AI Nutrition Explanation</h3>
+    <pre style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text-main); line-height: 1.7; white-space: pre-wrap; background: #05070a; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin: 1rem 0 0;">{{ ai_explanation }}</pre>
+</section>
+{% elif text_ai_available %}
+<section class="card" style="text-align: center; padding: var(--spacing-lg);" aria-label="AI Nutrition breakdown">
+    <span class="step-icon" style="font-size: 2.5rem; margin-bottom: 1rem; display: inline-block;" role="img" aria-label="salad icon">🥗</span>
+    <h3 style="margin-top: 0; color: var(--text-white);">AI Nutrition Breakdown</h3>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem; max-width: 500px; margin-left: auto; margin-right: auto;">Get a detailed breakdown and guide for your rule-based nutrition recommendations from your Together AI Coach.</p>
+    <form action="{{ url_for('web.generate_nutrition_ai_explanation_route') }}" method="post" style="margin: 0;">
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-weight: 800;">Generate AI Coach Explanation</button>
+    </form>
+</section>
+{% else %}
+<section class="empty-state" aria-label="AI explanation unavailable">
+    <span class="step-icon" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;" role="img" aria-label="robot icon">🤖</span>
+    <h4 style="margin: 0 0 0.5rem; color: var(--text-white);">AI Explanation Unavailable</h4>
+    <p style="margin: 0; font-size: 0.9rem;">Together API key not configured.</p>
+</section>
+{% endif %}
+
+<div class="action-buttons" style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
+    <a href="{{ url_for('web.results') if session.get('results') else url_for('web.plan') }}" class="btn btn-secondary" style="font-weight: 800;">Fitness Plan</a>
+    <a href="{{ url_for('web.daily_checkin') }}" class="btn btn-secondary" style="font-weight: 800;">Daily Check-in</a>
+    <a href="{{ url_for('web.dashboard') }}" class="btn btn-secondary" style="font-weight: 800;">Saved Plans</a>
 </div>
 {% endblock %}

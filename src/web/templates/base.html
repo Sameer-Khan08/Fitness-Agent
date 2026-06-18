@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="TrainWise AI — AI-powered fitness and athletic performance coach. Injury-aware, rule-based training plans.">
+    <meta name="description" content="TrainWise AI creates fitness, athletic performance, and injury-aware training plans with AI coaching and exercise visuals.">
     <title>{% block title %}TrainWise AI{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,11 +16,11 @@
         <main class="main-content">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                    <div class="flash-messages">
+                    <section class="flash-messages" aria-live="polite" aria-label="Notifications">
                         {% for category, message in messages %}
-                            <div class="flash flash-{{ category }}">{{ message }}</div>
+                            <div class="flash flash-{{ category }}" role="{% if category == 'error' %}alert{% else %}status{% endif %}">{{ message }}</div>
                         {% endfor %}
-                    </div>
+                    </section>
                 {% endif %}
             {% endwith %}
             {% block content %}{% endblock %}

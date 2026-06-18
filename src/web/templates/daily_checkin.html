@@ -8,79 +8,93 @@
     </div>
 </section>
 
-<form action="{{ url_for('web.daily_checkin') }}" method="post">
+<div class="info-box" style="margin-bottom: var(--spacing-lg); text-align: center;">
+    <span style="font-size: 1.2rem; margin-right: 0.5rem;">💡</span>
+    <strong>Use this before training to decide whether to train normally, modify, or recover.</strong>
+</div>
+
+<form action="{{ url_for('web.daily_checkin') }}" method="post" class="onboarding-form">
     <!-- Recovery Card -->
-    <div class="card">
-        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Recovery</h3>
+    <fieldset class="form-card">
+        <legend style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; width: 100%; display: block; font-weight: 700; font-size: 1.2rem;">Recovery</legend>
         <div class="form-row">
-            <label>Sleep Quality
-                <select name="sleep_quality">
+            <div>
+                <label for="sleep_quality">Sleep Quality</label>
+                <select id="sleep_quality" name="sleep_quality">
                     <option value="poor">Poor</option>
                     <option value="okay" selected>Okay</option>
                     <option value="good">Good</option>
                 </select>
-            </label>
-            <label>Energy Level
-                <select name="energy_level">
+            </div>
+            <div>
+                <label for="energy_level">Energy Level</label>
+                <select id="energy_level" name="energy_level">
                     <option value="low">Low</option>
                     <option value="medium" selected>Medium</option>
                     <option value="high">High</option>
                 </select>
-            </label>
+            </div>
         </div>
         <div class="form-row" style="margin-top: 1rem;">
-            <label>Muscle Soreness (0–10): <span class="range-value" id="soreness-val">0</span>
-                <input type="range" name="soreness" min="0" max="10" value="0" oninput="document.getElementById('soreness-val').textContent=this.value">
-            </label>
-            <label>Stress (0–10): <span class="range-value" id="stress-val">0</span>
-                <input type="range" name="stress" min="0" max="10" value="0" oninput="document.getElementById('stress-val').textContent=this.value">
-            </label>
+            <div>
+                <label for="soreness">Muscle Soreness (0–10): <span class="range-value" id="soreness-val">0</span></label>
+                <input type="range" id="soreness" name="soreness" min="0" max="10" value="0" oninput="document.getElementById('soreness-val').textContent=this.value">
+            </div>
+            <div>
+                <label for="stress">Stress (0–10): <span class="range-value" id="stress-val">0</span></label>
+                <input type="range" id="stress" name="stress" min="0" max="10" value="0" oninput="document.getElementById('stress-val').textContent=this.value">
+            </div>
         </div>
-    </div>
+    </fieldset>
 
-    <!-- Pain & Symptoms Card -->
-    <div class="card">
-        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Pain &amp; Symptoms</h3>
+    <!-- Pain Today Card -->
+    <fieldset class="form-card" style="border-left: 4px solid var(--warning-yellow);">
+        <legend style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; width: 100%; display: block; font-weight: 700; font-size: 1.2rem;">Pain Today</legend>
         <div class="form-row">
-            <label>Current Pain Rating (0–10): <span class="range-value" id="pain-val">0</span>
-                <input type="range" name="pain_rating" min="0" max="10" value="0" oninput="document.getElementById('pain-val').textContent=this.value">
-            </label>
-            <label>Pain Area Today
-                <input type="text" name="pain_area" placeholder="e.g. lower back, knee">
-            </label>
+            <div>
+                <label for="pain_rating" style="color: var(--warning-yellow);">Current Pain Rating (0–10): <span class="range-value" id="pain-val" style="color: var(--warning-yellow);">0</span></label>
+                <input type="range" id="pain_rating" name="pain_rating" min="0" max="10" value="0" oninput="document.getElementById('pain-val').textContent=this.value">
+            </div>
+            <div>
+                <label for="pain_area">Pain Area Today</label>
+                <input type="text" id="pain_area" name="pain_area" placeholder="e.g. lower back, knee">
+            </div>
         </div>
-        <label style="margin-top: 1rem;">Pain Trend
-            <select name="pain_trend">
+        <div style="margin-top: 1rem;">
+            <label for="pain_trend">Pain Trend</label>
+            <select id="pain_trend" name="pain_trend">
                 <option value="better">Better</option>
                 <option value="same" selected>Same</option>
                 <option value="worse">Worse</option>
             </select>
-        </label>
-    </div>
+        </div>
+    </fieldset>
 
-    <!-- Context Card -->
-    <div class="card">
-        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Context</h3>
+    <!-- Readiness Card -->
+    <fieldset class="form-card">
+        <legend style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; width: 100%; display: block; font-weight: 700; font-size: 1.2rem;">Readiness</legend>
         <div class="form-row">
-            <label>Trained yesterday?
-                <select name="trained_yesterday">
+            <div>
+                <label for="trained_yesterday">Trained yesterday?</label>
+                <select id="trained_yesterday" name="trained_yesterday">
                     <option value="yes">Yes</option>
                     <option value="no" selected>No</option>
                 </select>
-            </label>
-            <label>Ready to train?
-                <select name="ready_to_train">
+            </div>
+            <div>
+                <label for="ready_to_train">Ready to train?</label>
+                <select id="ready_to_train" name="ready_to_train">
                     <option value="yes" selected>Yes</option>
                     <option value="no">No</option>
                 </select>
-            </label>
+            </div>
         </div>
-    </div>
+    </fieldset>
 
-    <button type="submit" class="btn btn-primary btn-block" style="padding: 1rem;">Submit Check-in</button>
+    <button type="submit" class="btn btn-primary btn-block" style="padding: 1.25rem; font-size: 1.1rem; margin-top: var(--spacing-xl); font-weight: 800; letter-spacing: 0.02em;">Calculate Readiness</button>
 </form>
 
-<div style="margin-top: 1rem; text-align: center;">
-    <a href="{{ url_for('web.results') }}" class="btn btn-secondary btn-block">Back to Results</a>
+<div style="margin-top: 1.5rem; text-align: center;">
+    <a href="{{ url_for('web.results') }}" class="btn btn-ghost" style="text-decoration: none;">← Back to Results</a>
 </div>
 {% endblock %}

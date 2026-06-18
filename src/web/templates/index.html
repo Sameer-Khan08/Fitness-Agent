@@ -2,8 +2,36 @@
 {% block title %}TrainWise AI — Home{% endblock %}
 {% block content %}
 <section class="page-hero">
-    <h1>TrainWise AI</h1>
-    <p>Redirecting to your fitness dashboard…</p>
-    <a href="{{ url_for('web.onboarding') }}" class="btn btn-primary">Get Started</a>
+    <div class="page-hero-title">
+        <h1>Train smarter. Protect your body.</h1>
+        <p>AI-powered fitness planning for weight loss, muscle gain, athletic performance, and injury-aware training.</p>
+    </div>
 </section>
+
+<div class="card">
+    <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
+        <a href="{{ url_for('web.onboarding') }}" class="btn btn-primary">Create My Profile</a>
+        {% if session.get('profile') %}
+            <a href="{{ url_for('web.plan') }}" class="btn btn-secondary">View Current Plan</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="steps-grid">
+    <div class="metric-card">
+        <span class="step-icon">🛡️</span>
+        <h5>Injury-aware planning</h5>
+        <p>Adjusts routines based on your current pain areas to keep you safe.</p>
+    </div>
+    <div class="metric-card">
+        <span class="step-icon">🏃</span>
+        <h5>Sport-specific workouts</h5>
+        <p>Tailored exercises for your specific fitness goals and athletic needs.</p>
+    </div>
+    <div class="metric-card">
+        <span class="step-icon">📸</span>
+        <h5>AI exercise visuals</h5>
+        <p>Generate on-demand visual demonstrations using Together AI.</p>
+    </div>
+</div>
 {% endblock %}

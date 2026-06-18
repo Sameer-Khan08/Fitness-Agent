@@ -4,30 +4,30 @@
         <p class="sidebar-tagline">AI Fitness &amp; Athletic Coach</p>
         <p class="sidebar-version">Together AI Edition</p>
     </div>
-    <nav class="sidebar-nav">
-        <a href="{{ url_for('web.onboarding') }}" class="nav-link {% if request.endpoint == 'web.onboarding' %}active{% endif %}">Profile Setup</a>
-        <a href="{{ url_for('web.plan') if session.get('profile') else url_for('web.onboarding') }}" class="nav-link {% if request.endpoint in ['web.plan', 'web.results'] %}active{% endif %}">Current Plan</a>
-        <a href="{{ url_for('web.daily_checkin') }}" class="nav-link {% if request.endpoint in ['web.daily_checkin', 'web.daily_result'] %}active{% endif %}">Daily Check-in</a>
-        <a href="{{ url_for('web.nutrition') }}" class="nav-link {% if request.endpoint == 'web.nutrition' %}active{% endif %}">Nutrition</a>
-        <a href="{{ url_for('web.dashboard') }}" class="nav-link {% if request.endpoint in ['web.dashboard', 'web.saved_plan_detail'] %}active{% endif %}">Saved Plans</a>
+    <nav class="sidebar-nav" aria-label="Primary Navigation">
+        <a href="{{ url_for('web.onboarding') }}" class="nav-link {% if request.endpoint == 'web.onboarding' %}active{% endif %}" {% if request.endpoint == 'web.onboarding' %}aria-current="page"{% endif %}>Profile Setup</a>
+        <a href="{% if session.get('results') %}{{ url_for('web.results') }}{% elif session.get('profile') %}{{ url_for('web.plan') }}{% else %}{{ url_for('web.onboarding') }}{% endif %}" class="nav-link {% if request.endpoint in ['web.plan', 'web.results'] %}active{% endif %}" {% if request.endpoint in ['web.plan', 'web.results'] %}aria-current="page"{% endif %}>Current Plan</a>
+        <a href="{{ url_for('web.daily_checkin') }}" class="nav-link {% if request.endpoint in ['web.daily_checkin', 'web.daily_result'] %}active{% endif %}" {% if request.endpoint in ['web.daily_checkin', 'web.daily_result'] %}aria-current="page"{% endif %}>Daily Check-in</a>
+        <a href="{{ url_for('web.nutrition') }}" class="nav-link {% if request.endpoint == 'web.nutrition' %}active{% endif %}" {% if request.endpoint == 'web.nutrition' %}aria-current="page"{% endif %}>Nutrition</a>
+        <a href="{{ url_for('web.dashboard') }}" class="nav-link {% if request.endpoint in ['web.dashboard', 'web.saved_plan_detail'] %}active{% endif %}" {% if request.endpoint in ['web.dashboard', 'web.saved_plan_detail'] %}aria-current="page"{% endif %}>Saved Plans</a>
     </nav>
-    <div class="sidebar-status">
+    <div class="sidebar-status" role="region" aria-label="Service Connections">
         <h5>Service Connections</h5>
         <div class="status-line">
             <span>AI Coach:</span>
-            <span class="{% if api_status.text_ai %}status-ok{% else %}status-warn{% endif %}">
+            <span class="{% if api_status.text_ai %}status-ok{% else %}status-warn{% endif %}" role="status" aria-label="AI Coach is {% if api_status.text_ai %}connected{% else %}offline{% endif %}">
                 {% if api_status.text_ai %}Connected{% else %}Offline{% endif %}
             </span>
         </div>
         <div class="status-line">
             <span>Exercise Images:</span>
-            <span class="{% if api_status.images %}status-ok{% else %}status-warn{% endif %}">
+            <span class="{% if api_status.images %}status-ok{% else %}status-warn{% endif %}" role="status" aria-label="Exercise Images are {% if api_status.images %}connected{% else %}offline{% endif %}">
                 {% if api_status.images %}Connected{% else %}Offline{% endif %}
             </span>
         </div>
         <div class="status-line">
             <span>Cloud DB:</span>
-            <span class="{% if api_status.supabase %}status-ok{% else %}status-info{% endif %}">
+            <span class="{% if api_status.supabase %}status-ok{% else %}status-info{% endif %}" role="status" aria-label="Cloud Database is {% if api_status.supabase %}connected in cloud mode{% else %}running in local mode{% endif %}">
                 {% if api_status.supabase %}Connected{% else %}Local Mode{% endif %}
             </span>
         </div>
