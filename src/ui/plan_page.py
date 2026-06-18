@@ -13,6 +13,7 @@ from src.ui.components import (
     metric_card,
     profile_card,
     show_medical_disclaimer,
+    render_page_header,
 )
 
 
@@ -23,15 +24,24 @@ def render_plan_page() -> None:
     # 1. Custom CSS
     inject_custom_css()
 
-    st.title("🏋️ TrainWise AI")
-    st.subheader("Plan Builder Dashboard")
-    st.markdown("---")
+    render_page_header("Current Plan", "Generate and customize your athletic training program.")
 
     profile = st.session_state.get("profile")
 
     if not profile:
-        st.error("No profile found. Please complete the onboarding form first.")
-        if st.button("← Back to Onboarding", width="stretch"):
+        st.markdown(
+            """
+            <div class="warning-card" style="border-left: 5px solid #FFD700; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #FFD700; margin-top: 0; margin-bottom: 8px;">📋 Profile Missing</h4>
+                <p style="margin: 0; font-size: 14px; color: #E0E0E0; line-height: 1.5;">
+                    To build and view your customized training plan, we first need to understand your fitness level, goals, and safety constraints.
+                </p>
+            </div>
+            <br>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("Set Up Profile", type="primary", use_container_width=True):
             st.session_state.stage = "onboarding"
             st.rerun()
         return

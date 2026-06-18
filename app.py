@@ -65,6 +65,12 @@ if "selected_saved_plan" not in st.session_state:
 if "generated_image_count" not in st.session_state:
     st.session_state.generated_image_count = 0
 
+if "image_cache" not in st.session_state:
+    st.session_state.image_cache = {}
+
+if "selected_workout_day" not in st.session_state:
+    st.session_state.selected_workout_day = 0
+
 if "checkins" not in st.session_state:
     st.session_state.checkins = []
 
@@ -91,37 +97,52 @@ if not supabase_configured and current_stage in ["auth"]:
 if current_stage != "auth":
     with st.sidebar:
         st.markdown("<h2 style='text-align: center; color: #00FF87; margin-bottom: 0;'>TrainWise AI</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: gray; font-size: 11px; margin-top: 0;'>Athletic Planning & Safety</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: gray; font-size: 11px; margin-top: 0;'>AI Fitness & Athletic Performance</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #60EFFF; font-size: 10px; font-weight: bold; margin-top: -10px; margin-bottom: 10px;'>TrainWise AI MVP v0.1</p>", unsafe_allow_html=True)
         st.markdown("---")
         
         # Navigation buttons
-        if st.button("📋 Athlete Onboarding", use_container_width=True):
+        if st.button("👤 Profile Setup", use_container_width=True):
             st.session_state.stage = "onboarding"
             st.rerun()
             
-        if st.button("💪 Fitness Plan", use_container_width=True):
-            if st.session_state.get("profile"):
-                st.session_state.stage = "results" if st.session_state.get("results") else "plan"
+        if st.button("💪 Current Plan", use_container_width=True):
+            if not st.session_state.get("profile"):
+                st.toast("⚠️ Complete profile setup first!", icon="📋")
+                st.session_state.stage = "plan"
             else:
-                st.warning("⚠️ Complete onboarding first!")
+                st.session_state.stage = "results" if st.session_state.get("results") else "plan"
             st.rerun()
             
         if st.button("⏱ Daily Check-in", use_container_width=True):
-            if st.session_state.get("results"):
-                st.session_state.stage = "checkin"
-            else:
-                st.warning("⚠️ Generate a plan first!")
+            if not st.session_state.get("results"):
+                st.toast("⚠️ Generate a fitness plan first!", icon="💪")
+            st.session_state.stage = "checkin"
             st.rerun()
             
-        if st.button("🥗 Nutrition Guidance", use_container_width=True):
-            if st.session_state.get("profile"):
-                st.session_state.stage = "nutrition"
-            else:
-                st.warning("⚠️ Complete onboarding first!")
+        if st.button("🥗 Nutrition", use_container_width=True):
+            if not st.session_state.get("profile"):
+                st.toast("⚠️ Complete profile setup first!", icon="📋")
+            st.session_state.stage = "nutrition"
             st.rerun()
             
-        if st.button("📊 Saved Plans & Stats", use_container_width=True):
+        if st.button("📊 Saved Plans / Dashboard", use_container_width=True):
             st.session_state.stage = "dashboard"
+            st.rerun()
+            
+        st.markdown("---")
+        
+        # Service connection status indicators
+        from src.ui.components import render_api_status
+        render_api_status()
+        
+        st.markdown("---")
+        
+        if st.button("🔄 Start Over", use_container_width=True, type="secondary"):
+            from src.ui.components import reset_session_state
+            reset_session_state()
+            st.session_state.stage = "onboarding"
+            st.toast("🔄 Session state reset successfully!", icon="🧼")
             st.rerun()
             
         st.markdown("---")

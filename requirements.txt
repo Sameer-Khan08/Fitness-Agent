@@ -1,11 +1,7 @@
 streamlit
 openai
 python-dotenv
-pydantic
 requests
-pillow
 together
-watchdog
-supabase
 psycopg2-binary
 pandas

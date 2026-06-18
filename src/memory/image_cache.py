@@ -1,24 +1,29 @@
 """
 image_cache.py
 --------------
-Handles caching of generated exercise demo images during the session.
+Handles in-memory session caching of generated exercise demonstration images.
 """
 
 import streamlit as st
 
 def get_cached_image(exercise_name: str) -> str | None:
-    """Retrieve an image URL or base64 string from the cache by exercise name."""
+    """
+    Retrieve a cached image (data URI or URL) for the given exercise.
+    """
     if "image_cache" not in st.session_state:
         st.session_state.image_cache = {}
     return st.session_state.image_cache.get(exercise_name)
 
 def save_cached_image(exercise_name: str, image_url: str) -> None:
-    """Save an image to the cache for the given exercise name."""
+    """
+    Save the generated image URL to the session cache.
+    """
     if "image_cache" not in st.session_state:
         st.session_state.image_cache = {}
-    if exercise_name:
-        st.session_state.image_cache[exercise_name] = image_url
+    st.session_state.image_cache[exercise_name] = image_url
 
 def clear_image_cache() -> None:
-    """Clear all images from the cache."""
+    """
+    Clear the cached exercise demonstration images.
+    """
     st.session_state.image_cache = {}

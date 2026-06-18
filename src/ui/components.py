@@ -175,6 +175,23 @@ def hero_section(title: str, subtitle: str) -> None:
     )
 
 
+def render_page_header(title: str, subtitle: str | None = None) -> None:
+    """
+    Renders a premium visual page header consistent with the TrainWise AI branding.
+    """
+    st.markdown(
+        f"""
+        <div style="text-align: center; padding: 20px 10px 30px 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+            <h1 style="font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #00FF87 0%, #60EFFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; line-height: 1.2;">
+                {title}
+            </h1>
+            {f'<p style="font-size: 1.05rem; color: #8C96A8; max-width: 620px; margin: 0 auto; line-height: 1.4;">{subtitle}</p>' if subtitle else ''}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 def section_header(title: str, subtitle: str | None = None) -> None:
     """
     Renders a clean, modern section header.
@@ -348,72 +365,95 @@ def render_exercise_card(exercise: dict, day_idx: int = 0, ex_idx: int = 0) -> N
             unsafe_allow_html=True
         )
 
-    # 2. Instructions
+    # 2. Instructions in an expander
     if instructions:
-        st.markdown("**Instructions:**")
-        for i, step in enumerate(instructions):
-            st.markdown(f"{i+1}. {step}")
+        with st.expander("📝 View Instructions", expanded=False):
+            for i, step in enumerate(instructions):
+                st.markdown(f"{i+1}. {step}")
 
-    # 3. Common Mistakes & Avoid If Notes
-    col_l, col_r = st.columns(2)
-    with col_l:
-        if common_mistakes:
-            st.markdown("**Common Mistakes to Avoid:**")
+    # 3. Common Mistakes in an expander
+    if common_mistakes:
+        with st.expander("❌ Common Mistakes", expanded=False):
             for mistake in common_mistakes:
-                st.markdown(f"- ❌ {mistake}")
-    with col_r:
-        if avoid_if:
-            st.markdown("**Avoid If You Have:**")
-            avoid_list_str = ", ".join(avoid_if)
-            st.markdown(f"- ⚠️ {avoid_list_str.title()}")
+                st.markdown(f"- {mistake}")
 
-    # 4. Image Display / Generation
+    # 4. Avoid If in an expander
+    if avoid_if:
+        with st.expander("⚠️ Avoid If", expanded=False):
+            avoid_list_str = ", ".join(avoid_if)
+            st.markdown(f"- **Do not perform if you experience pain in:** {avoid_list_str.title()}")
+
+    # 5. Image Display & Generation
     from src.memory.image_cache import get_cached_image, save_cached_image
+    from src.exercises.image_prompts import generate_exercise_demo_image
+    from src.config.settings import TOGETHER_API_KEY
     
-    cached_img = get_cached_image(name)
+    exercise_name = exercise.get("name", "Exercise")
+    cached_img = get_cached_image(exercise_name)
+    
     if cached_img:
-        st.image(cached_img, caption=f"{name} Demonstration", use_container_width=True)
+        # Show cached image
+        st.image(cached_img, caption=f"Demo for {exercise_name.title()}", use_container_width=True)
     else:
+        # Show placeholder
         st.markdown(
             """
             <div style="background-color: #0E1117; border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 16px; text-align: center; margin: 12px 0;">
                 <span style="font-size: 20px;">🖼️</span>
                 <p style="margin: 4px 0 0 0; font-size: 12px; color: #8C96A8; font-style: italic;">
-                    Exercise demo image will appear here.
+                    No demonstration image generated yet.
                 </p>
             </div>
             """,
             unsafe_allow_html=True
         )
-        st.caption("⚠️ AI-generated exercise images may be imperfect. Follow written instructions and consult a qualified coach for technique-sensitive movements.")
+
+    # UI warning text
+    st.markdown(
+        "<p style='font-size: 11px; color: #8C96A8; font-style: italic; margin-top: 4px; margin-bottom: 8px; line-height: 1.3;'>"
+        "⚠️ AI-generated exercise images may be imperfect. Follow the written instructions and consult a "
+        "qualified coach for technique-sensitive movements.</p>",
+        unsafe_allow_html=True
+    )
+
+    # API key check & Button rendering
+    if not TOGETHER_API_KEY:
+        st.info("ℹ️ Image generation is disabled because the image API key is missing.")
+    else:
+        # Check generated image count limit (5 per session)
+        count = st.session_state.get("generated_image_count", 0)
         
-        btn_key = f"generate_image_{day_idx}_{ex_idx}_{name}"
-        if st.button("🖼️ Generate Demo Image", key=btn_key):
-            count = st.session_state.get("generated_image_count", 0)
-            if count >= 5:
-                st.warning("Image generation limit reached for this session (Max 5).")
-            else:
-                from src.exercises.image_prompts import generate_exercise_demo_image
-                with st.spinner(f"Generating image for {name}..."):
-                    res = generate_exercise_demo_image(exercise)
-                    if res.get("success") and res.get("image_url"):
-                        st.session_state.generated_image_count = count + 1
-                        save_cached_image(name, res["image_url"])
+        # Unique safe button key
+        safe_name = exercise_name.lower().replace(" ", "_").replace("-", "_")
+        button_key = f"generate_image_{day_idx}_{ex_idx}_{safe_name}"
+        
+        if cached_img:
+            st.button("🖼️ Demo Image Generated", key=button_key, disabled=True, use_container_width=True)
+        elif count >= 5:
+            st.warning("⚠️ Session limit reached (Max 5 images per session).")
+            st.button("Generate Demo Image", key=button_key, disabled=True, use_container_width=True)
+        else:
+            if st.button("🖼️ Generate Demo Image", key=button_key, use_container_width=True):
+                with st.spinner("🎨 Generating demonstration image via Together AI..."):
+                    result = generate_exercise_demo_image(exercise)
+                    if result.get("success") and result.get("image_url"):
+                        save_cached_image(exercise_name, result["image_url"])
+                        st.session_state.generated_image_count += 1
+                        st.success("✅ Demo image generated successfully!")
                         st.rerun()
                     else:
-                        st.error(f"Generation failed: {res.get('error')}")
+                        st.error(f"❌ Generation failed: {result.get('error', 'Unknown error')}")
 
-    # 5. Image Prompt Preview
-    from src.exercises.image_prompts import build_exercise_demo_prompt
-    prompt_text = build_exercise_demo_prompt(exercise)
+    # 6. Image Prompt Preview in an expander
+    from src.exercises.image_prompts import build_exercise_image_prompt
+    prompt_text = build_exercise_image_prompt(exercise.get("name", "Exercise"))
     with st.expander("🔍 Image Prompt Preview", expanded=False):
         st.code(prompt_text, language="text")
 
 
 def workout_day_card(day_plan: dict, day_idx: int = 0) -> None:
     """
-    Renders a premium visual card showing a full day's training program,
-    incorporating session type, warm-up, exercises with detail cards, and recovery.
+    Renders a premium visual card showing a day's training program inside a Streamlit expander.
     """
     day = day_plan.get("day", f"Day {day_idx + 1}")
     session_type = day_plan.get("session_type", "Training Session")
@@ -425,61 +465,37 @@ def workout_day_card(day_plan: dict, day_idx: int = 0) -> None:
     coaching = day_plan.get("coaching_note", "")
     intensity = day_plan.get("intensity", "Moderate")
 
-    # Header Card Segment
-    st.markdown(
-        f"""
-        <div style="background: linear-gradient(135deg, #181B22 0%, #12161F 100%); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px 12px 0 0; padding: 18px 22px; border-bottom: 2px solid #00FF87;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <h4 style="margin: 0; color: #00FF87; font-size: 1.25rem;">📅 {day}</h4>
-                <span style="background-color: rgba(96, 239, 255, 0.12); color: #60EFFF; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;">⏱ {duration} MIN</span>
-            </div>
-            <h5 style="margin: 10px 0 6px 0; color: white; font-size: 1.05rem;">🎯 {session_type}</h5>
-            {f'<p style="margin: 0 0 8px 0; font-size: 13px; color: #8C96A8; font-style: italic; line-height: 1.4;">{session_goal}</p>' if session_goal else ''}
-            <div style="margin-top: 8px; font-size: 11px; letter-spacing: 0.5px;">
-                <span style="color: #8C96A8; font-weight: 700; text-transform: uppercase;">Intensity:</span> 
-                <span style="color: #FFD700; font-weight: bold; text-transform: uppercase;">{intensity}</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    header_label = f"📅 {day} · {session_type} · {intensity.upper()} ({duration} MINS)"
+    
+    with st.expander(header_label, expanded=True):
+        if session_goal:
+            st.markdown(f"<p style='color: #8C96A8; font-style: italic; margin-bottom: 12px;'>Goal: {session_goal}</p>", unsafe_allow_html=True)
+            
+        if warm_up:
+            st.markdown(f"**🔥 Warm-Up:** {warm_up}")
+            st.markdown("<hr style='margin:12px 0; opacity:0.08;'>", unsafe_allow_html=True)
 
-    # Content Container wrapper
-    st.markdown(
-        """
-        <div style="background-color: #0E1117; border: 1px solid rgba(255, 255, 255, 0.07); border-top: none; border-radius: 0 0 12px 12px; padding: 20px 22px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.18);">
-        """,
-        unsafe_allow_html=True
-    )
+        if exercises:
+            st.markdown("### Exercise Cards")
+            for ex_idx, exercise in enumerate(exercises):
+                render_exercise_card(exercise, day_idx=day_idx, ex_idx=ex_idx)
+                if ex_idx < len(exercises) - 1:
+                    st.markdown("<hr style='margin:10px 0; opacity:0.04;'>", unsafe_allow_html=True)
+        else:
+            st.caption("No exercises programmed.")
 
-    # Session Elements
-    if warm_up:
-        st.markdown(f"**🔥 Warm-Up:** {warm_up}")
-        st.markdown("<hr style='margin:12px 0; opacity:0.08;'>", unsafe_allow_html=True)
+        if cool_down:
+            st.markdown("<hr style='margin:12px 0; opacity:0.08;'>", unsafe_allow_html=True)
+            st.markdown(f"**🧊 Cool-Down:** {cool_down}")
 
-    if exercises:
-        st.markdown("**💪 Exercises**")
-        for ex_idx, exercise in enumerate(exercises):
-            render_exercise_card(exercise, day_idx=day_idx, ex_idx=ex_idx)
-            if ex_idx < len(exercises) - 1:
-                st.markdown("<hr style='margin:10px 0; opacity:0.04;'>", unsafe_allow_html=True)
-    else:
-        st.caption("No exercises programmed.")
-
-    if cool_down:
-        st.markdown("<hr style='margin:12px 0; opacity:0.08;'>", unsafe_allow_html=True)
-        st.markdown(f"**🧊 Cool-Down:** {cool_down}")
-
-    if coaching:
-        st.markdown("<hr style='margin:12px 0; opacity:0.08;'>", unsafe_allow_html=True)
-        st.markdown(
-            f"<div class='info-card' style='margin-bottom: 0;'>"
-            f"<strong>💬 Coach's Advice:</strong> {coaching}"
-            f"</div>",
-            unsafe_allow_html=True
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+        if coaching:
+            st.markdown("<hr style='margin:12px 0; opacity:0.08;'>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='info-card' style='margin-bottom: 0;'>"
+                f"<strong>💬 Coach's Advice:</strong> {coaching}"
+                f"</div>",
+                unsafe_allow_html=True
+            )
 
 
 def show_medical_disclaimer() -> None:
@@ -513,4 +529,52 @@ def render_status_badge(status: str) -> None:
         st.error("🔴 Stop / Seek Help")
     else:
         st.info("⚪ Review Required")
+
+
+def render_api_status() -> None:
+    """
+    Renders status indicators for configured API dependencies.
+    """
+    from src.config.settings import OPENAI_API_KEY, TOGETHER_API_KEY, SUPABASE_URL, SUPABASE_KEY
+    
+    st.markdown("<h5 style='margin-bottom: 8px; color: #FFFFFF;'>🔌 Service Connections</h5>", unsafe_allow_html=True)
+    
+    # 1. AI Explanation
+    if OPENAI_API_KEY:
+        st.success("🤖 AI Coach: Connected")
+    else:
+        st.warning("🤖 AI Coach: Offline (Local Rules)")
+        
+    # 2. Image Generation
+    if TOGETHER_API_KEY:
+        st.success("🖼️ Demo Images: Connected")
+    else:
+        st.warning("🖼️ Demo Images: Offline")
+        
+    # 3. Supabase Database/Auth
+    if SUPABASE_URL and SUPABASE_KEY:
+        st.success("☁️ Cloud Auth/DB: Connected")
+    else:
+        st.info("☁️ Cloud Auth/DB: Local Mode")
+
+
+def reset_session_state() -> None:
+    """
+    Clears all active onboarding, plan, check-in, and nutrition states.
+    Does NOT clear auth or saved plans.
+    """
+    st.session_state.profile = None
+    st.session_state.results = []
+    st.session_state.error = None
+    st.session_state.last_generated_plan = None
+    st.session_state.ai_explanation = None
+    st.session_state.current_readiness = None
+    st.session_state.adjusted_today_workout = None
+    st.session_state.selected_saved_plan = None
+    st.session_state.nutrition_result = None
+    st.session_state.nutrition_ai_explanation = None
+    if "image_cache" in st.session_state:
+        st.session_state.image_cache = {}
+
+
 

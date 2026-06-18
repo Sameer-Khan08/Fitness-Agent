@@ -1,17 +1,27 @@
 import streamlit as st
-from src.ui.components import inject_custom_css, show_medical_disclaimer, section_header
+from src.ui.components import inject_custom_css, show_medical_disclaimer, section_header, render_page_header
 from src.nutrition.nutrition_engine import estimate_nutrition_targets
 
 def render_nutrition_page() -> None:
     inject_custom_css()
-    st.title("TrainWise AI")
-    st.subheader("Nutrition Guidance")
-    st.markdown("---")
+    
+    render_page_header("Nutrition Guidance", "Personalized caloric recommendations, protein targets, and meal timing structures.")
 
     profile = st.session_state.get("profile")
     if not profile:
-        st.warning("Please complete the onboarding form to generate personalized nutrition estimates.")
-        if st.button("Go to Onboarding"):
+        st.markdown(
+            """
+            <div class="warning-card" style="border-left: 5px solid #FFD700; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #FFD700; margin-top: 0; margin-bottom: 8px;">🥗 Profile Required for Nutrition</h4>
+                <p style="margin: 0; font-size: 14px; color: #E0E0E0; line-height: 1.5;">
+                    To estimate your caloric baseline, daily targets, protein intake, and meal structure, please complete the onboarding setup first.
+                </p>
+            </div>
+            <br>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("Set Up Profile", type="primary", use_container_width=True):
             st.session_state.stage = "onboarding"
             st.rerun()
         return

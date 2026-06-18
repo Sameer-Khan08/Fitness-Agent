@@ -6,7 +6,7 @@ Uses columns, clean sections, custom CSS styling, and dashboard cards.
 """
 
 import streamlit as st
-from src.ui.components import inject_custom_css, hero_section
+from src.ui.components import inject_custom_css, render_page_header
 
 
 def render_onboarding_page() -> None:
@@ -17,12 +17,11 @@ def render_onboarding_page() -> None:
     # 1. Custom CSS
     inject_custom_css()
 
-    # 2. Hero Section
-    hero_section(
-        title="TrainWise AI",
-        subtitle="AI-powered fitness and athletic performance planning with injury-aware reality checks."
+    # 2. Page Header
+    render_page_header(
+        title="Profile Setup",
+        subtitle="Specify your biometrics, goals, and training experience to build your injury-aware athletic training program."
     )
-    st.subheader("Athlete Onboarding")
 
     # 3. How it Works cards
     col1, col2, col3 = st.columns(3)
@@ -62,11 +61,118 @@ def render_onboarding_page() -> None:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # --- Demo Profile Options ---
+    col_demo1, col_demo2 = st.columns([1.8, 1.2])
+    with col_demo1:
+        if st.button("🚀 Load Demo Athlete Profile", use_container_width=True, type="primary"):
+            profile_data = {
+                "age": 21,
+                "gender": "Male",
+                "height_cm": "6'4",
+                "weight_kg": "85kg",
+                "main_goal": "Athletic Performance",
+                "goal": "Athletic Performance",
+                "sport": "Football",
+                "main_sport": "Football",
+                "fitness_level": "Intermediate",
+                "training_days_per_week": 4,
+                "session_duration": "60 minutes",
+                "injuries": "groin pain during sprinting",
+                "pain_rating": 5,
+                "primary_problem": "Groin pain during sprinting. Football intermediate athlete trying to optimize performance.",
+            }
+            st.session_state.profile = profile_data
+            if st.session_state.get('user_id'):
+                from database.save_new_user import save_user_profile_data
+                save_user_profile_data(st.session_state.user_id, profile_data)
+            st.session_state.stage = "plan"
+            st.toast("Loaded Football Groin Pain Demo Profile!", icon="🏅")
+            st.rerun()
+            
+    with col_demo2:
+        with st.expander("🧪 Demo Test Profiles", expanded=False):
+            if st.button("Beginner Weight Loss", use_container_width=True):
+                profile_data = {
+                    "age": 35,
+                    "gender": "Female",
+                    "height_cm": "165",
+                    "weight_kg": "75",
+                    "main_goal": "Weight Loss",
+                    "goal": "Weight Loss",
+                    "sport": "None",
+                    "main_sport": "None",
+                    "fitness_level": "Beginner",
+                    "training_days_per_week": 3,
+                    "session_duration": "45 minutes",
+                    "injuries": "",
+                    "pain_rating": 0,
+                    "primary_problem": "Weight loss focus, beginner level, no active pain.",
+                }
+                st.session_state.profile = profile_data
+                if st.session_state.get('user_id'):
+                    from database.save_new_user import save_user_profile_data
+                    save_user_profile_data(st.session_state.user_id, profile_data)
+                st.session_state.stage = "plan"
+                st.toast("Loaded Beginner Weight Loss Profile!", icon="🥗")
+                st.rerun()
+                
+            if st.button("Football Groin Pain", use_container_width=True):
+                profile_data = {
+                    "age": 21,
+                    "gender": "Male",
+                    "height_cm": "6'4",
+                    "weight_kg": "85kg",
+                    "main_goal": "Athletic Performance",
+                    "goal": "Athletic Performance",
+                    "sport": "Football",
+                    "main_sport": "Football",
+                    "fitness_level": "Intermediate",
+                    "training_days_per_week": 4,
+                    "session_duration": "60 minutes",
+                    "injuries": "groin pain during sprinting",
+                    "pain_rating": 5,
+                    "primary_problem": "groin pain during sprinting. Football intermediate athlete.",
+                }
+                st.session_state.profile = profile_data
+                if st.session_state.get('user_id'):
+                    from database.save_new_user import save_user_profile_data
+                    save_user_profile_data(st.session_state.user_id, profile_data)
+                st.session_state.stage = "plan"
+                st.toast("Loaded Football Groin Pain Demo Profile!", icon="🏅")
+                st.rerun()
+                
+            if st.button("Red Flag Lower Back Pain", use_container_width=True):
+                profile_data = {
+                    "age": 42,
+                    "gender": "Male",
+                    "height_cm": "180",
+                    "weight_kg": "95",
+                    "main_goal": "Strength",
+                    "goal": "Strength",
+                    "sport": "Gym Only",
+                    "main_sport": "Gym Only",
+                    "fitness_level": "Advanced",
+                    "training_days_per_week": 5,
+                    "session_duration": "75 minutes",
+                    "injuries": "Lower back pain radiating down leg, numbness in foot",
+                    "pain_rating": 8,
+                    "primary_problem": "Lower back pain radiating down leg, numbness in foot. Severe pain, requires safety red flag check.",
+                }
+                st.session_state.profile = profile_data
+                if st.session_state.get('user_id'):
+                    from database.save_new_user import save_user_profile_data
+                    save_user_profile_data(st.session_state.user_id, profile_data)
+                st.session_state.stage = "plan"
+                st.toast("Loaded Red Flag Lower Back Pain Profile!", icon="🚨")
+                st.rerun()
+
+    st.markdown("<hr style='margin:15px 0; opacity:0.1;'>", unsafe_allow_html=True)
+
     # 4. Form
     with st.form(key="onboarding_form"):
         
-        # --- Section 1: Body Profile ---
-        st.markdown("### 👤 Body Profile")
+        # --- Section 1: Basic Info ---
+        st.markdown("### 👤 Basic Info")
         col_age, col_gen = st.columns(2)
         with col_age:
             age = st.number_input(
@@ -75,43 +181,65 @@ def render_onboarding_page() -> None:
                 max_value=100,
                 value=25,
                 step=1,
+                help="Your age helps customize metabolic calculations."
             )
         with col_gen:
             gender = st.selectbox(
                 "Gender",
                 options=["Male", "Female", "Other", "Prefer not to say"],
+                help="Used for baseline physiological screening."
             )
 
         col_h, col_w = st.columns(2)
         with col_h:
-            height = st.text_input("Height", value="170", placeholder="e.g. 170 or 5'9\"")
+            height = st.text_input("Height", value="170", placeholder="e.g. 170 or 5'9\"", help="Enter in cm or feet/inches (e.g. 5'10\")")
         with col_w:
-            weight = st.text_input("Weight", value="70", placeholder="e.g. 70 or 154 lbs")
+            weight = st.text_input("Weight", value="70", placeholder="e.g. 70 or 154 lbs", help="Enter in kg or lbs")
 
         st.markdown("<hr style='margin:20px 0; opacity:0.1;'>", unsafe_allow_html=True)
 
-        # --- Section 2: Training Goal ---
-        st.markdown("### 🎯 Training Goal")
-        main_goal = st.selectbox(
-            "Main Goal",
-            options=[
-                "Weight Loss",
-                "Muscle Gain",
-                "General Fitness",
-                "Athletic Performance",
-                "Sport-Specific Performance",
-                "Strength",
-                "Endurance",
-                "Mobility",
-            ],
-        )
+        # --- Section 2: Goal & Sport ---
+        st.markdown("### 🎯 Goal & Sport")
+        col_goal, col_sport = st.columns(2)
+        with col_goal:
+            main_goal = st.selectbox(
+                "Main Goal",
+                options=[
+                    "Weight Loss",
+                    "Muscle Gain",
+                    "General Fitness",
+                    "Athletic Performance",
+                    "Sport-Specific Performance",
+                    "Strength",
+                    "Endurance",
+                    "Mobility",
+                ],
+                help="Select your primary fitness objective."
+            )
+        with col_sport:
+            sport = st.selectbox(
+                "Sport Focus",
+                options=[
+                    "None",
+                    "Gym Only",
+                    "Football",
+                    "Soccer",
+                    "Basketball",
+                    "Cricket",
+                    "Tennis",
+                    "Badminton",
+                    "Running",
+                    "Other",
+                ],
+                help="Select the sport you want to prepare or train for."
+            )
 
         fitness_level = st.selectbox(
             "Fitness Level",
             options=["Beginner", "Intermediate", "Advanced"],
+            help="Adapts complexity of movements and volume."
         )
 
-        # Retain the primary problem field from specificity overhaul as it drives AI diagnosis logic
         st.markdown("##### 🔍 Describe your exact situation (Primary Problem)")
         st.caption("Tell us exactly what you want to solve. Be as specific as possible.")
         primary_problem = st.text_area(
@@ -128,45 +256,34 @@ def render_onboarding_page() -> None:
 
         st.markdown("<hr style='margin:20px 0; opacity:0.1;'>", unsafe_allow_html=True)
 
-        # --- Section 3: Sport & Schedule ---
-        st.markdown("### 🏃 Sport & Schedule")
-        sport = st.selectbox(
-            "Sport Focus",
-            options=[
-                "None",
-                "Gym Only",
-                "Football",
-                "Soccer",
-                "Basketball",
-                "Cricket",
-                "Tennis",
-                "Badminton",
-                "Running",
-                "Other",
-            ],
-        )
-
+        # --- Section 3: Training Availability ---
+        st.markdown("### 📅 Training Availability")
         training_days = st.slider(
             "Training days per week",
             min_value=2,
             max_value=7,
             value=3,
+            help="Select how many days a week you want to exercise."
         )
 
         session_duration = st.selectbox(
             "Preferred session duration",
             options=["30 minutes", "45 minutes", "60 minutes", "75 minutes", "90 minutes"],
-            index=2
+            index=2,
+            help="Target duration for a single workout session."
         )
 
         st.markdown("<hr style='margin:20px 0; opacity:0.1;'>", unsafe_allow_html=True)
 
-        # --- Section 4: Injury Reality Check ---
-        st.markdown("### 🛡️ Injury Reality Check")
+        # --- Section 4: Pain / Injury Check ---
+        st.markdown("### 🩹 Pain / Injury Check")
+        st.info("💡 **Honesty Note**: Please be honest about your pain levels and any prior injury history. This allows the rule-based safety screening engine to filter exercises correctly, capping intensity when needed to protect you.")
+        
         injuries = st.text_area(
             "Describe any injuries or pain areas",
             placeholder="Example: groin pain during sprinting, knee pain when jumping, lower back pain during deadlifts",
             height=80,
+            help="Specify where and when you experience discomfort."
         )
 
         pain_rating = st.slider(
@@ -176,7 +293,7 @@ def render_onboarding_page() -> None:
             value=0,
             help="0 = no pain, 10 = worst pain imaginable"
         )
-        st.caption("ℹ️ 0 = no pain, 10 = worst pain imaginable")
+        st.caption("ℹ️ 0 = no pain, 10 = worst pain imaginable. Rating >= 8 will cap training to low-intensity recovery.")
 
         st.markdown("<br>", unsafe_allow_html=True)
         submitted = st.form_submit_button("Build My Plan", width="stretch", type="primary")

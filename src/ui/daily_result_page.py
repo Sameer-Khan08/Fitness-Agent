@@ -5,21 +5,30 @@ Displays the daily readiness results and the adjusted workout plan.
 """
 
 import streamlit as st
-from src.ui.components import inject_custom_css, workout_day_card, render_status_badge, show_medical_disclaimer
+from src.ui.components import inject_custom_css, workout_day_card, render_status_badge, show_medical_disclaimer, render_page_header
 
 def render_daily_result_page() -> None:
     """Display readiness status and adjusted workout."""
     inject_custom_css()
     
-    st.title("Daily Check-in")
-    st.subheader("Daily Readiness")
-    st.markdown("---")
+    render_page_header("Daily Readiness", "Your readiness summary and adjusted training program for today.")
     
     readiness = st.session_state.get("current_readiness")
     if not readiness:
-        st.warning("No readiness data found.")
-        if st.button("← Back"):
-            st.session_state.stage = "results"
+        st.markdown(
+            """
+            <div class="warning-card" style="border-left: 5px solid #FFD700; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #FFD700; margin-top: 0; margin-bottom: 8px;">⏱ No Daily Check-in Found</h4>
+                <p style="margin: 0; font-size: 14px; color: #E0E0E0; line-height: 1.5;">
+                    You have not submitted a daily check-in for today. Complete the check-in to see your body readiness score and workout modifications.
+                </p>
+            </div>
+            <br>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("Go to Daily Check-in", type="primary", use_container_width=True):
+            st.session_state.stage = "checkin"
             st.rerun()
         return
         
@@ -77,6 +86,8 @@ def render_daily_result_page() -> None:
             st.rerun()
     with b3:
         if st.button("Start Over", use_container_width=True, type="primary"):
+            from src.ui.components import reset_session_state
+            reset_session_state()
             st.session_state.stage = "onboarding"
             st.rerun()
 

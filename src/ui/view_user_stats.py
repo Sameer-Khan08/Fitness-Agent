@@ -1,15 +1,13 @@
 import streamlit as st
 import pandas as pd
-from src.ui.components import inject_custom_css
+from src.ui.components import inject_custom_css, section_header, workout_day_card, show_medical_disclaimer, render_page_header
 from src.memory.plan_store import get_saved_plans_local
-from src.ui.components import section_header, workout_day_card, show_medical_disclaimer
 
 def render_dashboard_page():
     inject_custom_css()
     
     username = st.session_state.get("username") or "Athlete"
-    st.markdown(f"<h2>Welcome, {username}!</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: gray;'>Here is your fitness dashboard.</p>", unsafe_allow_html=True)
+    render_page_header(f"Welcome, {username}!", "Track your training statistics and view your saved athletic plans.")
     
     # 1. Fetch stats (try/except for local mode without DB)
     stats = []
@@ -92,8 +90,27 @@ def render_dashboard_page():
         saved_plans = get_saved_plans_local()
         st.caption(f"Total saved plans: {len(saved_plans)}")
         
+        if saved_plans:
+            if st.button("🗑️ Clear Saved Plans", key="clear_all_saved_plans", type="secondary", use_container_width=True):
+                from src.memory.plan_store import clear_saved_plans_local
+                clear_saved_plans_local()
+                st.toast("🧼 Saved plans cleared successfully!", icon="🗑️")
+                st.rerun()
+            st.markdown("<br>", unsafe_allow_html=True)
+            
         if not saved_plans:
-            st.info("You haven't saved any training plans yet.")
+            st.markdown(
+                """
+                <div class="info-card" style="border-left: 5px solid #60EFFF; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #60EFFF; margin-top: 0; margin-bottom: 8px;">📊 No Saved Plans Found</h4>
+                    <p style="margin: 0; font-size: 14px; color: #E0E0E0; line-height: 1.5;">
+                        Once you generate a fitness plan, you can click "Save Plan" to archive it here for future reference and comparison.
+                    </p>
+                </div>
+                <br>
+                """,
+                unsafe_allow_html=True
+            )
         else:
             for idx, plan in enumerate(saved_plans):
                 date_saved = plan.get("saved_at", "Unknown Date")
@@ -123,6 +140,53 @@ def render_dashboard_page():
                 st.session_state.clear()
                 st.session_state.stage = "auth"
                 st.rerun()
+
+    # Deployment Checklist
+    st.markdown("---")
+    st.subheader("📋 Deployment Checklist")
+    with st.expander("System Deployment Status & Verification Checklist", expanded=False):
+        import os
+        from src.config.settings import OPENAI_API_KEY, TOGETHER_API_KEY, SUPABASE_URL, SUPABASE_KEY
+        
+        # 1. Project Files Check
+        req_exists = os.path.exists("requirements.txt")
+        env_ex_exists = os.path.exists(".env.example")
+        readme_exists = os.path.exists("README.md")
+        
+        st.markdown("**1. Required Deployment Files:**")
+        if req_exists:
+            st.markdown("✅ `requirements.txt` file exists.")
+        else:
+            st.markdown("❌ `requirements.txt` file is missing!")
+            
+        if env_ex_exists:
+            st.markdown("✅ `.env.example` file exists.")
+        else:
+            st.markdown("❌ `.env.example` file is missing!")
+            
+        if readme_exists:
+            st.markdown("✅ `README.md` file exists.")
+        else:
+            st.markdown("❌ `README.md` file is missing!")
+            
+        st.markdown("**2. Core Execution Engine:**")
+        st.markdown("🟢 **Active**: API Keys are not required for the core rule-based fitness planner.")
+        
+        st.markdown("**3. External Services Connections:**")
+        if OPENAI_API_KEY:
+            st.markdown("🟢 **OpenAI key**: Configured (AI Coach explanations enabled)")
+        else:
+            st.markdown("🟡 **OpenAI key**: Missing (AI Coach explanations disabled)")
+            
+        if TOGETHER_API_KEY:
+            st.markdown("🟢 **Together AI key**: Configured (exercise demo images enabled)")
+        else:
+            st.markdown("🟡 **Together AI key**: Missing (exercise demo images disabled)")
+            
+        if SUPABASE_URL and SUPABASE_KEY:
+            st.markdown("🟢 **Supabase client**: Configured (cloud database & sync active)")
+        else:
+            st.markdown("🔵 **Supabase client**: Missing (running in local fallback memory mode)")
 
     st.markdown("<br>", unsafe_allow_html=True)
     show_medical_disclaimer()

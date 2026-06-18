@@ -13,6 +13,7 @@ from src.ui.components import (
     workout_day_card,
     render_status_badge,
     show_medical_disclaimer,
+    render_page_header,
 )
 
 
@@ -23,19 +24,33 @@ def render_results_page() -> None:
     # 1. Inject Custom CSS
     inject_custom_css()
 
-    st.title("TrainWise AI")
-    st.subheader("Fitness Plan")
-    st.markdown("Built from your goal, sport, fitness level, and injury context.")
-    st.markdown("---")
+    render_page_header("Current Plan", "Your customized training plan designed from your goals, sport, and physiological screening.")
 
     plan = st.session_state.get("results")
     profile = st.session_state.get("profile")
 
     if not plan or not isinstance(plan, dict) or not profile:
-        st.warning("No plan found. Please generate a plan first.")
-        if st.button("← Back to Plan Page", width="stretch"):
-            st.session_state.stage = "plan"
-            st.rerun()
+        st.markdown(
+            """
+            <div class="warning-card" style="border-left: 5px solid #FFD700; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #FFD700; margin-top: 0; margin-bottom: 8px;">💪 No Active Plan</h4>
+                <p style="margin: 0; font-size: 14px; color: #E0E0E0; line-height: 1.5;">
+                    You don't have an active training plan yet. If you have already set up your profile, you can generate your plan now.
+                </p>
+            </div>
+            <br>
+            """,
+            unsafe_allow_html=True
+        )
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("Profile Setup", use_container_width=True):
+                st.session_state.stage = "onboarding"
+                st.rerun()
+        with col_b:
+            if st.button("Generate Plan", type="primary", use_container_width=True):
+                st.session_state.stage = "plan"
+                st.rerun()
         return
 
     # Extract rule-based MVP elements
@@ -123,114 +138,115 @@ def render_results_page() -> None:
 
     # ── 5. SECTIONS ──────────────────────────────────────────────────────────
 
-    # Section 1: Reality Check
+    # Section 1: Reality Check (Expander)
     section_header("Reality Check", "Physiological screening details and recommendations.")
-    if recommendations:
-        st.markdown("**Recommendations:**")
-        for rec in recommendations:
-            st.info(f"👉 {rec}")
-    else:
-        st.caption("No specific recommendations found.")
+    with st.expander("🩺 View Reality Check details", expanded=True):
+        if recommendations:
+            st.markdown("**Recommendations:**")
+            for rec in recommendations:
+                st.info(f"👉 {rec}")
+        else:
+            st.caption("No specific recommendations found.")
 
-    # Section 2: Goal Priorities
+        st.markdown("**What to Avoid:**")
+        if avoid_list:
+            for item in avoid_list:
+                st.markdown(
+                    f"""
+                    <div class="warning-card" style="margin-bottom: 8px;">
+                        <strong style="color: #FF4B4B;">⚠️ Restricted Pattern:</strong> Avoid {item}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.markdown(
+                """
+                <div class="info-card" style="margin-bottom: 8px;">
+                    🟢 No major movement restrictions detected.
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    # Section 2: Goal Priorities (Expander)
     section_header("Goal Priorities", "Core focus areas matching your goal.")
-    priorities = goal_priorities.get("priorities", [])
-    if priorities:
-        tags_html = ""
-        for item in priorities:
-            tags_html += f'<span class="status-badge badge-ready" style="margin-right: 8px; font-size: 11px;">{item.upper()}</span>'
-        st.markdown(tags_html, unsafe_allow_html=True)
-        st.caption(f"Training Style: **{goal_priorities.get('training_style', 'Balanced').title()}**")
-    else:
-        st.caption("No specific goal priorities mapped.")
+    with st.expander("🎯 View Goal Priorities", expanded=False):
+        priorities = goal_priorities.get("priorities", [])
+        if priorities:
+            tags_html = ""
+            for item in priorities:
+                tags_html += f'<span class="status-badge badge-ready" style="margin-right: 8px; font-size: 11px;">{item.upper()}</span>'
+            st.markdown(tags_html, unsafe_allow_html=True)
+            st.caption(f"Training Style: **{goal_priorities.get('training_style', 'Balanced').title()}**")
+        else:
+            st.caption("No specific goal priorities mapped.")
 
-    # Section 3: Sport Demands
+    # Section 3: Sport Demands (Expander)
     section_header("Sport Demands", "Requisite physical capacities and prehab requirements.")
-    demands = sport_demands.get("demands", [])
-    prehab = sport_demands.get("prehab_focus", [])
+    with st.expander("🏃 View Sport Demands", expanded=False):
+        demands = sport_demands.get("demands", [])
+        prehab = sport_demands.get("prehab_focus", [])
+        
+        col_d1, col_d2 = st.columns(2)
+        with col_d1:
+            st.markdown("**Sport Capacities:**")
+            if demands:
+                for dem in demands:
+                    st.markdown(f"⚡ {dem.title()}")
+            else:
+                st.caption("No specific demands defined.")
+                
+        with col_d2:
+            st.markdown("**Prehab Focus Areas:**")
+            if prehab:
+                for ph in prehab:
+                    st.markdown(f"🛡️ {ph.title()}")
+            else:
+                st.caption("No prehab target zones defined.")
+
+    # Section 4: Weekly Plan (Day tabs)
+    st.subheader("Weekly Plan")
+    st.caption("Select a day to view the workout.")
     
-    col_d1, col_d2 = st.columns(2)
-    with col_d1:
-        st.markdown("**Sport Capacities:**")
-        if demands:
-            for dem in demands:
-                st.markdown(f"⚡ {dem.title()}")
-        else:
-            st.caption("No specific demands defined.")
-            
-    with col_d2:
-        st.markdown("**Prehab Focus Areas:**")
-        if prehab:
-            for ph in prehab:
-                st.markdown(f"🛡️ {ph.title()}")
-        else:
-            st.caption("No prehab target zones defined.")
-
-    # Section 4: What to Avoid
-    section_header("What to Avoid", "Exercises or patterns restricted to protect joints and tissues.")
-    if avoid_list:
-        for item in avoid_list:
-            st.markdown(
-                f"""
-                <div class="warning-card">
-                    <strong style="color: #FF4B4B;">⚠️ Restricted Pattern:</strong> Avoid {item}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-    else:
-        st.markdown(
-            """
-            <div class="info-card">
-                🟢 No major movement restrictions detected.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    # Section 5: Weekly Plan
-    section_header("Weekly Plan", "Click the expander on any exercise to view the technique cues and personalized coach notes.")
     if weekly_schedule:
-        for i, day_plan in enumerate(weekly_schedule):
-            workout_day_card(day_plan, day_idx=i)
+        day_tabs = st.tabs([day_plan.get("day", f"Day {i+1}") for i, day_plan in enumerate(weekly_schedule)])
+        for day_idx, tab in enumerate(day_tabs):
+            with tab:
+                workout_day_card(weekly_schedule[day_idx], day_idx=day_idx)
     else:
-        st.warning("No weekly plan generated.")
+        st.info("Generate a plan first to view workout days.")
 
-    # Section 6: Coach Notes
-    section_header("Coach Notes", "General advice for nutrition, recovery, and program progression.")
-    if notes:
-        for note in notes:
+    # Section 5: Notes & Coach Advice (Expander)
+    section_header("Notes", "General advice for nutrition, recovery, and program progression.")
+    with st.expander("💡 View Coach Notes & AI Coach Explanation", expanded=False):
+        st.markdown("### Coach Tips")
+        if notes:
+            for note in notes:
+                st.markdown(f"- {note}")
+        else:
+            st.caption("No coach notes provided.")
+            
+        st.markdown("<hr style='margin:18px 0; opacity:0.1;'>", unsafe_allow_html=True)
+        st.markdown("### AI Coach Explanation")
+        
+        explanation_val = st.session_state.get("ai_explanation")
+        if explanation_val:
             st.markdown(
                 f"""
-                <div class="info-card">
-                    💡 <strong>Coach Tip:</strong> {note}
+                <div class="fitness-card">
+                    {explanation_val}
                 </div>
                 """,
                 unsafe_allow_html=True
             )
-    else:
-        st.caption("No coach notes provided.")
-
-    # Section 7: AI Coach Explanation
-    section_header("AI Coach Explanation", "Get a personalized breakdown of your plan from our AI assistant.")
-    
-    explanation_val = st.session_state.get("ai_explanation")
-    if explanation_val:
-        st.markdown(
-            f"""
-            <div class="fitness-card">
-                {explanation_val}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        if st.button("🤖 Generate AI Explanation", type="secondary"):
-            with st.spinner("Generating explanation..."):
-                from src.agents.fitness_agent import generate_ai_plan_explanation
-                explanation = generate_ai_plan_explanation(plan)
-                st.session_state.ai_explanation = explanation
-                st.rerun()
+        else:
+            if st.button("🤖 Generate AI Explanation", type="secondary"):
+                with st.spinner("Generating explanation..."):
+                    from src.agents.fitness_agent import generate_ai_plan_explanation
+                    explanation = generate_ai_plan_explanation(plan)
+                    st.session_state.ai_explanation = explanation
+                    st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     show_medical_disclaimer()
@@ -259,9 +275,7 @@ def render_results_page() -> None:
 
     with btn_col2:
         if st.button("Start Over", width="stretch", type="primary"):
+            from src.ui.components import reset_session_state
+            reset_session_state()
             st.session_state.stage = "onboarding"
-            st.session_state.profile = None
-            st.session_state.results = []
-            st.session_state.image_cache = {}
-            st.session_state.ai_explanation = None
             st.rerun()

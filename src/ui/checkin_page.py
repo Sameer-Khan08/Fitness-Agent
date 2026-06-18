@@ -8,16 +8,33 @@ import streamlit as st
 from src.memory.checkin_store import save_checkin_local
 from src.planning.readiness_engine import calculate_readiness
 from src.planning.workout_adjuster import adjust_workout_for_readiness
-from src.ui.components import inject_custom_css, show_medical_disclaimer
+from src.ui.components import inject_custom_css, show_medical_disclaimer, render_page_header
 
 def render_checkin_page() -> None:
     """Display the daily check-in form."""
     inject_custom_css()
     
-    st.title("Daily Check-in")
-    st.markdown("Let's see how your body is feeling today before you train.")
+    render_page_header("Daily Check-in", "Track your body's readiness, pain levels, and fatigue to adapt today's training program.")
     
-    if st.button("← Cancel", type="secondary"):
+    if not st.session_state.get("results") or not st.session_state.get("profile"):
+        st.markdown(
+            """
+            <div class="warning-card" style="border-left: 5px solid #FFD700; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #FFD700; margin-top: 0; margin-bottom: 8px;">⏱ Plan Required for Check-in</h4>
+                <p style="margin: 0; font-size: 14px; color: #E0E0E0; line-height: 1.5;">
+                    The daily check-in adjusts your active workout program based on today's sleep, muscle soreness, and pain ratings. Please generate a fitness plan first.
+                </p>
+            </div>
+            <br>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("Generate Fitness Plan", type="primary", use_container_width=True):
+            st.session_state.stage = "plan" if st.session_state.get("profile") else "onboarding"
+            st.rerun()
+        return
+
+    if st.button("← Back to Results", type="secondary"):
         st.session_state.stage = "results"
         st.rerun()
         
