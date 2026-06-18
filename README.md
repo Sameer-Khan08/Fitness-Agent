@@ -136,6 +136,15 @@ trainwise_ai/
 │       └── static/                 # CSS, JS, images
 ```
 
+## Exercise Images
+
+* **Technology**: Powered by Together AI (using the primary or fallback image models).
+* **Manual Trigger**: Images are never generated automatically; they are created only when you click the "Generate Exercise Visual" or "Regenerate Visual" buttons.
+* **Caching**: Generated images and their prompt metadata are cached in the Flask session so they do not incur multiple API costs when you reload the page.
+* **Session Limit**: To keep costs predictable, there is a hard limit of 5 image generation API calls per session.
+* **Regeneration**: If you are not satisfied with a generated image, you can click "Regenerate Visual". This will make a new API call, replace the cached visual, and count towards your session limit.
+* **Safety & Accuracy**: AI-generated visuals may contain anatomical inaccuracies, form anomalies, or minor errors. Written instructions and warning notes remain the primary guide for safe exercise execution.
+
 ## Current Limitations
 
 - Plans are session-based (in-memory); they reset when the server restarts

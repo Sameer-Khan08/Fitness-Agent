@@ -124,18 +124,34 @@ The image should look like a **professional exercise demo card** that clearly te
 
 def build_exercise_demo_prompt(exercise: dict) -> str:
     """
-    Build a realistic exercise demo prompt using exercise details.
+    Build a descriptive prompt for generating a realistic exercise visual reference.
     """
     name = exercise.get("name", "exercise")
-    category = exercise.get("category", "general")
+    category = exercise.get("category", "strength")
     level = exercise.get("level", "beginner")
     demo_focus = exercise.get("demo_focus", "correct posture")
-    
+    common_mistakes = exercise.get("common_mistakes", [])
+
+    # Infer camera angle matching the exercise type
+    name_lower = name.lower()
+    if "squat" in name_lower or "deadlift" in name_lower or "plank" in name_lower or "lunge" in name_lower:
+        view_angle = "Show full body from a 45-degree front-side angle to capture joint alignment clearly"
+    elif "press" in name_lower or "curl" in name_lower or "extension" in name_lower:
+        view_angle = "Show full body from a clear front angle"
+    else:
+        view_angle = "Show full body from a clear coaching angle"
+
     prompt = (
-        f"Realistic full-body fitness demonstration photo of a person performing a {name} "
-        f"in a clean gym setting. Show {demo_focus}. "
-        "No text, no labels, no distorted anatomy, no unsafe form."
+        f"Create a photorealistic fitness instruction image of one adult athlete performing a {name} "
+        f"in a clean gym or plain studio background. {view_angle}. "
+        f"The athlete keeps a {demo_focus}, maintains correct posture and correct joint alignment, wearing non-sexual athletic clothing. "
     )
+
+    if common_mistakes:
+        mistakes_str = ", ".join(common_mistakes)
+        prompt += f"Avoid common mistakes such as {mistakes_str}. "
+
+    prompt += "No text, no labels, no watermark, no extra people, no distorted anatomy, no unsafe form."
     return prompt
 
 
@@ -231,14 +247,13 @@ def generate_exercise_image(exercise_name: str) -> bytes:
         ) from fallback_error
 
 
-def generate_exercise_demo_image(exercise: dict) -> dict:
+def generate_exercise_demo_image(exercise: dict, force_regenerate: bool = False) -> dict:
     """
-    Safe wrapper for generating an exercise demo image.
+    Safe wrapper for generating an exercise visual reference image.
     Handles API errors safely and returns a result dictionary.
     """
-    name = exercise.get("name")
     prompt = build_exercise_demo_prompt(exercise)
-    
+    name = exercise.get("name")
     if not name:
         return {
             "success": False,
@@ -246,23 +261,22 @@ def generate_exercise_demo_image(exercise: dict) -> dict:
             "error": "Exercise name is missing.",
             "prompt": prompt
         }
-        
+
+    from src.config.settings import TOGETHER_API_KEY, IMAGE_MODEL_API_KEY
+    api_key = TOGETHER_API_KEY or IMAGE_MODEL_API_KEY
+
+    if not api_key:
+        return {
+            "success": False,
+            "image_url": None,
+            "error": "Exercise image generation is unavailable. Add TOGETHER_API_KEY to enable it.",
+            "prompt": prompt
+        }
+
     try:
-        from src.config.settings import TOGETHER_API_KEY
-        if not TOGETHER_API_KEY:
-            return {
-                "success": False,
-                "image_url": None,
-                "error": "TOGETHER_API_KEY is not configured.",
-                "prompt": prompt
-            }
-            
-        # We use the existing function but we override its prompt by patching or we just let it use the default name prompt.
-        # Actually, the existing `generate_exercise_image` calls `build_exercise_image_prompt(exercise_name)`.
-        # To use the new `build_exercise_demo_prompt`, let's just make the Together API call directly here to ensure it uses `prompt`.
+        client = Together(api_key=api_key)
         
-        client = Together(api_key=TOGETHER_API_KEY)
-        
+        # Try primary model first
         try:
             response = client.images.generate(
                 prompt=prompt,
@@ -270,29 +284,38 @@ def generate_exercise_demo_image(exercise: dict) -> dict:
                 n=1,
             )
             img_bytes = _extract_image_bytes(response)
-        except Exception:
-            # Fallback
-            response = client.images.generate(
-                prompt=prompt,
-                model=IMAGE_MODEL_FALLBACK,
-                width=512,
-                height=512,
-                steps=4,
-                n=1,
-            )
-            img_bytes = _extract_image_bytes(response)
-            
+        except Exception as primary_error:
+            # Fallback model
+            try:
+                response = client.images.generate(
+                    prompt=prompt,
+                    model=IMAGE_MODEL_FALLBACK,
+                    width=512,
+                    height=512,
+                    steps=4,
+                    n=1,
+                )
+                img_bytes = _extract_image_bytes(response)
+            except Exception as fallback_error:
+                return {
+                    "success": False,
+                    "image_url": None,
+                    "error": f"API generation failed. Primary model: {str(primary_error)}. Fallback: {str(fallback_error)}",
+                    "prompt": prompt
+                }
+
         # Convert bytes to base64 data URI
         import base64
         b64_str = base64.b64encode(img_bytes).decode('utf-8')
         image_url = f"data:image/png;base64,{b64_str}"
-        
+
         return {
             "success": True,
             "image_url": image_url,
             "error": None,
             "prompt": prompt
         }
+
     except Exception as e:
         return {
             "success": False,

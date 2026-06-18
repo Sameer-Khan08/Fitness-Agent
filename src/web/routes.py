@@ -9,7 +9,7 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from src.agents.fitness_agent import generate_ai_plan_explanation, generate_fitness_plan
 from src.agents.nutrition_agent import generate_nutrition_ai_explanation
 from src.config.settings import TEXT_AI_ENABLED, IMAGE_AI_ENABLED
-from src.exercises.image_prompts import build_exercise_image_prompt, generate_exercise_demo_image
+from src.exercises.image_prompts import build_exercise_demo_prompt, generate_exercise_demo_image
 from src.memory.checkin_store import save_checkin_local
 from src.memory.image_cache import get_cached_image, save_cached_image
 from src.memory.plan_store import clear_saved_plans_local, get_saved_plans_local, save_plan_local
@@ -127,8 +127,7 @@ def results():
     weekly = results.get("weekly_plan", [])
     for day_idx, day_plan in enumerate(weekly):
         for ex_idx, exercise in enumerate(day_plan.get("exercises", [])):
-            name = exercise.get("name", "Exercise")
-            exercise_prompts[f"{day_idx}_{ex_idx}"] = build_exercise_image_prompt(name)
+            exercise_prompts[f"{day_idx}_{ex_idx}"] = build_exercise_demo_prompt(exercise)
 
     return render_template(
         "results.html",
@@ -317,25 +316,28 @@ def generate_exercise_image_route():
 
     exercise = exercises[ex_idx]
     exercise_name = exercise.get("name", "Exercise")
+    force_regenerate = request.form.get("force_regenerate") == "1"
 
-    if get_cached_image(exercise_name):
+    cached = get_cached_image(exercise_name)
+    if cached and cached.get("image_url") and not force_regenerate:
         return redirect(url_for("web.results") + f"#exercise-{day_idx}-{ex_idx}")
 
     if not IMAGE_AI_ENABLED:
-        flash("Image generation unavailable: API key not configured.", "warning")
+        flash("Exercise image generation is unavailable. Add TOGETHER_API_KEY to enable it.", "warning")
         return redirect(url_for("web.results") + f"#exercise-{day_idx}-{ex_idx}")
 
     count = session.get("generated_image_count", 0)
     if count >= 5:
-        flash("Session limit reached (max 5 images per session).", "warning")
+        flash("Image generation limit reached for this session.", "warning")
         return redirect(url_for("web.results") + f"#exercise-{day_idx}-{ex_idx}")
 
-    result = generate_exercise_demo_image(exercise)
+    result = generate_exercise_demo_image(exercise, force_regenerate=force_regenerate)
     if result.get("success") and result.get("image_url"):
-        save_cached_image(exercise_name, result["image_url"])
+        save_cached_image(exercise_name, result["image_url"], result["prompt"])
         set_session_value("generated_image_count", count + 1)
-        flash("Exercise image generated.", "success")
+        flash("Exercise visual generated successfully.", "success")
     else:
-        flash(f"Image generation failed: {result.get('error', 'Unknown error')}", "error")
+        err_msg = result.get("error") or "Unknown error occurred"
+        flash(f"Image generation failed: {err_msg}", "error")
 
     return redirect(url_for("web.results") + f"#exercise-{day_idx}-{ex_idx}")
