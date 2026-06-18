@@ -22,8 +22,10 @@ function initDayTabs() {
             panels.forEach((panel) => {
                 const panelIndex = panel.getAttribute('data-day-panel');
                 if (panelIndex === index) {
+                    panel.classList.add('active');
                     panel.removeAttribute('hidden');
                 } else {
+                    panel.classList.remove('active');
                     panel.setAttribute('hidden', '');
                 }
             });

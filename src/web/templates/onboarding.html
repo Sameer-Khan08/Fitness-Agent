@@ -2,8 +2,10 @@
 {% block title %}Profile Setup — TrainWise AI{% endblock %}
 {% block content %}
 <section class="page-hero">
-    <h1>Profile Setup</h1>
-    <p>Specify your biometrics, goals, and training experience to build your injury-aware athletic training program.</p>
+    <div class="page-hero-title">
+        <h1>Profile Setup</h1>
+        <p>Specify your biometrics, goals, and training experience to build your injury-aware athletic training program.</p>
+    </div>
 </section>
 
 <div class="steps-grid">
@@ -14,25 +16,26 @@
 
 <details class="demo-profiles">
     <summary>Demo Test Profiles</summary>
-    <div class="demo-buttons">
-        <form action="{{ url_for('web.load_demo_profile', demo_type='athlete') }}" method="post">
-            <button type="submit" class="btn btn-primary">Load Demo Athlete Profile</button>
+    <div class="demo-buttons" style="margin-top: 1rem;">
+        <form action="{{ url_for('web.load_demo_profile', demo_type='athlete') }}" method="post" style="display: inline-block; margin-right: 0.5rem; margin-bottom: 0.5rem;">
+            <button type="submit" class="btn btn-primary btn-sm">Load Demo Athlete Profile</button>
         </form>
-        <form action="{{ url_for('web.load_demo_profile', demo_type='weight_loss') }}" method="post">
-            <button type="submit" class="btn btn-secondary">Beginner Weight Loss</button>
+        <form action="{{ url_for('web.load_demo_profile', demo_type='weight_loss') }}" method="post" style="display: inline-block; margin-right: 0.5rem; margin-bottom: 0.5rem;">
+            <button type="submit" class="btn btn-secondary btn-sm">Beginner Weight Loss</button>
         </form>
-        <form action="{{ url_for('web.load_demo_profile', demo_type='groin_pain') }}" method="post">
-            <button type="submit" class="btn btn-secondary">Football Groin Pain</button>
+        <form action="{{ url_for('web.load_demo_profile', demo_type='groin_pain') }}" method="post" style="display: inline-block; margin-right: 0.5rem; margin-bottom: 0.5rem;">
+            <button type="submit" class="btn btn-secondary btn-sm">Football Groin Pain</button>
         </form>
-        <form action="{{ url_for('web.load_demo_profile', demo_type='red_back_pain') }}" method="post">
-            <button type="submit" class="btn btn-secondary">Red Flag Lower Back Pain</button>
+        <form action="{{ url_for('web.load_demo_profile', demo_type='red_back_pain') }}" method="post" style="display: inline-block; margin-bottom: 0.5rem;">
+            <button type="submit" class="btn btn-secondary btn-sm">Red Flag Lower Back Pain</button>
         </form>
     </div>
 </details>
 
-<form class="form-card" action="{{ url_for('web.onboarding') }}" method="post">
-    <fieldset>
-        <legend>Basic Info</legend>
+<form action="{{ url_for('web.onboarding') }}" method="post">
+    <!-- Section 1: Basic Info -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Basic Info</h3>
         <div class="form-row">
             <label>Age (years)
                 <input type="number" name="age" min="12" max="100" value="25" required>
@@ -54,10 +57,11 @@
                 <input type="text" name="weight" value="70" placeholder="e.g. 70 or 154 lbs">
             </label>
         </div>
-    </fieldset>
+    </div>
 
-    <fieldset>
-        <legend>Goal &amp; Sport</legend>
+    <!-- Section 2: Goal & Sport -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Goal &amp; Sport</h3>
         <div class="form-row">
             <label>Main Goal
                 <select name="main_goal">
@@ -86,25 +90,27 @@
                 </select>
             </label>
         </div>
-        <label>Fitness Level
-            <select name="fitness_level">
-                <option>Beginner</option>
-                <option selected>Intermediate</option>
-                <option>Advanced</option>
-            </select>
-        </label>
+        <div class="form-row">
+            <label style="grid-column: span 2;">Fitness Level
+                <select name="fitness_level">
+                    <option>Beginner</option>
+                    <option selected>Intermediate</option>
+                    <option>Advanced</option>
+                </select>
+            </label>
+        </div>
         <label>Primary problem or goal description
-            <textarea name="primary_problem" rows="4" placeholder="Describe your exact situation…"></textarea>
+            <textarea name="primary_problem" rows="3" placeholder="Describe your exact situation…"></textarea>
         </label>
-    </fieldset>
+    </div>
 
-    <fieldset>
-        <legend>Training Availability</legend>
-        <label>Training days per week
-            <input type="range" name="training_days_per_week" min="2" max="7" value="3" oninput="this.nextElementSibling.textContent=this.value">
-            <span class="range-value">3</span>
+    <!-- Section 3: Training Availability -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Training Availability</h3>
+        <label>Training days per week: <span class="range-value" id="days-val">3</span>
+            <input type="range" name="training_days_per_week" min="2" max="7" value="3" oninput="document.getElementById('days-val').textContent=this.value">
         </label>
-        <label>Preferred session duration
+        <label style="margin-top: 1.5rem;">Preferred session duration
             <select name="session_duration">
                 <option>30 minutes</option>
                 <option>45 minutes</option>
@@ -113,20 +119,20 @@
                 <option>90 minutes</option>
             </select>
         </label>
-    </fieldset>
+    </div>
 
-    <fieldset>
-        <legend>Pain / Injury Check</legend>
-        <p class="info-note">Please be honest about pain levels and injury history so the safety engine can filter exercises correctly.</p>
+    <!-- Section 4: Pain / Injury Check -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Pain / Injury Check</h3>
+        <span class="info-note">Please be honest about pain levels and injury history so the safety engine can filter exercises correctly.</span>
         <label>Injuries or pain areas
             <textarea name="injuries" rows="3" placeholder="e.g. groin pain during sprinting"></textarea>
         </label>
-        <label>Current pain rating (0 = none, 10 = worst)
-            <input type="range" name="pain_rating" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
-            <span class="range-value">0</span>
+        <label style="margin-top: 1rem;">Current pain rating (0 = none, 10 = worst): <span class="range-value" id="pain-val">0</span>
+            <input type="range" name="pain_rating" min="0" max="10" value="0" oninput="document.getElementById('pain-val').textContent=this.value">
         </label>
-    </fieldset>
+    </div>
 
-    <button type="submit" class="btn btn-primary btn-block">Build My Plan</button>
+    <button type="submit" class="btn btn-primary btn-block" style="padding: 1rem;">Build My Plan</button>
 </form>
 {% endblock %}

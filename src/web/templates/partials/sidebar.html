@@ -1,29 +1,38 @@
 <aside class="sidebar">
     <div class="sidebar-brand">
         <h2>TrainWise AI</h2>
-        <p class="sidebar-tagline">AI Fitness &amp; Athletic Performance</p>
-        <p class="sidebar-version">TrainWise AI MVP v0.1</p>
+        <p class="sidebar-tagline">AI Fitness &amp; Athletic Coach</p>
+        <p class="sidebar-version">Together AI Edition</p>
     </div>
     <nav class="sidebar-nav">
-        <a href="{{ url_for('web.onboarding') }}" class="nav-link">Profile Setup</a>
-        <a href="{{ url_for('web.plan') if session.get('profile') else url_for('web.onboarding') }}" class="nav-link">Current Plan</a>
-        <a href="{{ url_for('web.daily_checkin') }}" class="nav-link">Daily Check-in</a>
-        <a href="{{ url_for('web.nutrition') }}" class="nav-link">Nutrition</a>
-        <a href="{{ url_for('web.dashboard') }}" class="nav-link">Saved Plans</a>
+        <a href="{{ url_for('web.onboarding') }}" class="nav-link {% if request.endpoint == 'web.onboarding' %}active{% endif %}">Profile Setup</a>
+        <a href="{{ url_for('web.plan') if session.get('profile') else url_for('web.onboarding') }}" class="nav-link {% if request.endpoint in ['web.plan', 'web.results'] %}active{% endif %}">Current Plan</a>
+        <a href="{{ url_for('web.daily_checkin') }}" class="nav-link {% if request.endpoint in ['web.daily_checkin', 'web.daily_result'] %}active{% endif %}">Daily Check-in</a>
+        <a href="{{ url_for('web.nutrition') }}" class="nav-link {% if request.endpoint == 'web.nutrition' %}active{% endif %}">Nutrition</a>
+        <a href="{{ url_for('web.dashboard') }}" class="nav-link {% if request.endpoint in ['web.dashboard', 'web.saved_plan_detail'] %}active{% endif %}">Saved Plans</a>
     </nav>
     <div class="sidebar-status">
         <h5>Service Connections</h5>
-        <p class="status-line {% if api_status.text_ai %}status-ok{% else %}status-warn{% endif %}">
-            AI Coach: {% if api_status.text_ai %}Connected{% else %}Offline{% endif %}
-        </p>
-        <p class="status-line {% if api_status.images %}status-ok{% else %}status-warn{% endif %}">
-            Demo Images: {% if api_status.images %}Connected{% else %}Offline{% endif %}
-        </p>
-        <p class="status-line {% if api_status.supabase %}status-ok{% else %}status-info{% endif %}">
-            Cloud DB: {% if api_status.supabase %}Connected{% else %}Local Mode{% endif %}
-        </p>
+        <div class="status-line">
+            <span>AI Coach:</span>
+            <span class="{% if api_status.text_ai %}status-ok{% else %}status-warn{% endif %}">
+                {% if api_status.text_ai %}Connected{% else %}Offline{% endif %}
+            </span>
+        </div>
+        <div class="status-line">
+            <span>Demo Images:</span>
+            <span class="{% if api_status.images %}status-ok{% else %}status-warn{% endif %}">
+                {% if api_status.images %}Connected{% else %}Offline{% endif %}
+            </span>
+        </div>
+        <div class="status-line">
+            <span>Cloud DB:</span>
+            <span class="{% if api_status.supabase %}status-ok{% else %}status-info{% endif %}">
+                {% if api_status.supabase %}Connected{% else %}Local Mode{% endif %}
+            </span>
+        </div>
     </div>
     <form action="{{ url_for('web.start_over') }}" method="post" class="sidebar-form">
-        <button type="submit" class="btn btn-secondary btn-block">Start Over</button>
+        <button type="submit" class="btn btn-secondary btn-block btn-sm">Start Over</button>
     </form>
 </aside>

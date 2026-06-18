@@ -1,4 +1,4 @@
-<div class="workout-day-panel" data-day-panel="{{ day_idx }}" {% if day_idx != 0 %}hidden{% endif %}>
+<div class="workout-day-panel {% if day_idx == 0 %}active{% endif %}" data-day-panel="{{ day_idx }}" {% if day_idx != 0 %}hidden{% endif %}>
     <div class="workout-day-header">
         <h3>{{ day_plan.day }} — {{ day_plan.session_type }}</h3>
         <p class="session-meta">

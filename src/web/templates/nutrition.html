@@ -2,32 +2,34 @@
 {% block title %}Nutrition — TrainWise AI{% endblock %}
 {% block content %}
 <section class="page-hero">
-    <h1>Nutrition Guidance</h1>
-    <p>Personalized caloric recommendations, protein targets, and meal structure.</p>
+    <div class="page-hero-title">
+        <h1>Nutrition Guidance</h1>
+        <p>Personalized caloric recommendations, protein targets, and meal structure.</p>
+    </div>
 </section>
 
 <div class="metrics-row">
     <div class="metric-card">
         <span class="label">Estimated Maintenance</span>
-        <strong>{% if nutrition.maintenance_calories %}{{ nutrition.maintenance_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
+        <strong style="font-size: 1.3rem; color: var(--accent-cyan);">{% if nutrition.maintenance_calories %}{{ nutrition.maintenance_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
     </div>
     <div class="metric-card">
         <span class="label">Daily Target</span>
-        <strong>{% if nutrition.target_calories %}{{ nutrition.target_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
+        <strong style="font-size: 1.3rem; color: var(--primary-green);">{% if nutrition.target_calories %}{{ nutrition.target_calories }} kcal/day{% else %}Unavailable{% endif %}</strong>
     </div>
 </div>
 
 <div class="card">
-    <h3>Macronutrients &amp; Hydration</h3>
-    <p>🍗 <strong>Protein Target:</strong> {{ nutrition.protein_range_g|default('—') }}</p>
-    <p>💧 <strong>Hydration:</strong> {{ nutrition.hydration|default('—') }}</p>
+    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Macronutrients &amp; Hydration</h3>
+    <p style="margin: 0.75rem 0 0.5rem;">🍗 <strong>Protein Target:</strong> <span style="color: var(--accent-cyan); font-weight: 600;">{{ nutrition.protein_range_g|default('—') }}</span></p>
+    <p style="margin: 0;">💧 <strong>Hydration:</strong> <span style="color: var(--accent-cyan); font-weight: 600;">{{ nutrition.hydration|default('—') }}</span></p>
 </div>
 
 <div class="card">
-    <h3>Meal Structure Guidelines</h3>
-    <ul>
+    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Meal Structure Guidelines</h3>
+    <ul style="padding-left: 1.25rem; margin: 0.75rem 0 0;">
         {% for item in nutrition.meal_structure|default([]) %}
-        <li>{{ item }}</li>
+        <li style="margin-bottom: 0.4rem;">{{ item }}</li>
         {% else %}
         <li>No meal structure guidelines available.</li>
         {% endfor %}
@@ -36,23 +38,26 @@
 
 {% if nutrition.notes %}
 <div class="card">
-    <h3>Coach Notes</h3>
-    {% for note in nutrition.notes %}
-    <p class="info-inline">👉 {{ note }}</p>
-    {% endfor %}
+    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Coach Notes</h3>
+    <div style="margin-top: 0.75rem;">
+        {% for note in nutrition.notes %}
+        <p class="info-inline" style="display: block; margin: 0.4rem 0;">👉 {{ note }}</p>
+        {% endfor %}
+    </div>
 </div>
 {% endif %}
 
 <div class="card">
-    <h3>AI Nutrition Explanation</h3>
+    <h3 style="margin-top: 0; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">AI Nutrition Explanation</h3>
     {% if ai_explanation %}
-    <pre class="ai-explanation">{{ ai_explanation }}</pre>
+    <pre style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text-main); line-height: 1.7; white-space: pre-wrap; background: #05070a; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin: 0.75rem 0 0;">{{ ai_explanation }}</pre>
     {% elif text_ai_available %}
-    <form action="{{ url_for('web.generate_nutrition_ai_explanation_route') }}" method="post">
-        <button type="submit" class="btn btn-secondary">Generate AI Explanation</button>
+    <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.95rem;">Generate an AI breakdown and guide for your rule-based nutrition recommendations.</p>
+    <form action="{{ url_for('web.generate_nutrition_ai_explanation_route') }}" method="post" style="margin: 0;">
+        <button type="submit" class="btn btn-primary">Generate AI Explanation</button>
     </form>
     {% else %}
-    <p class="info-inline">AI explanation unavailable — text AI API key not configured.</p>
+    <p class="info-inline" style="display: block; margin-top: 0.75rem;">AI explanation unavailable — Together AI API key not configured.</p>
     {% endif %}
 </div>
 

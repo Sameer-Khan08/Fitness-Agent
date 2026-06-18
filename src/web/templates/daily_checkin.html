@@ -2,13 +2,16 @@
 {% block title %}Daily Check-in — TrainWise AI{% endblock %}
 {% block content %}
 <section class="page-hero">
-    <h1>Daily Check-in</h1>
-    <p>Track readiness, pain, and fatigue to adapt today's training.</p>
+    <div class="page-hero-title">
+        <h1>Daily Check-in</h1>
+        <p>Track readiness, pain, and fatigue to adapt today's training.</p>
+    </div>
 </section>
 
-<form class="form-card" action="{{ url_for('web.daily_checkin') }}" method="post">
-    <fieldset>
-        <legend>Recovery</legend>
+<form action="{{ url_for('web.daily_checkin') }}" method="post">
+    <!-- Recovery Card -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Recovery</h3>
         <div class="form-row">
             <label>Sleep Quality
                 <select name="sleep_quality">
@@ -25,40 +28,39 @@
                 </select>
             </label>
         </div>
-        <div class="form-row">
-            <label>Muscle Soreness (0–10)
-                <input type="range" name="soreness" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
-                <span class="range-value">0</span>
+        <div class="form-row" style="margin-top: 1rem;">
+            <label>Muscle Soreness (0–10): <span class="range-value" id="soreness-val">0</span>
+                <input type="range" name="soreness" min="0" max="10" value="0" oninput="document.getElementById('soreness-val').textContent=this.value">
             </label>
-            <label>Stress (0–10)
-                <input type="range" name="stress" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
-                <span class="range-value">0</span>
+            <label>Stress (0–10): <span class="range-value" id="stress-val">0</span>
+                <input type="range" name="stress" min="0" max="10" value="0" oninput="document.getElementById('stress-val').textContent=this.value">
             </label>
         </div>
-    </fieldset>
+    </div>
 
-    <fieldset>
-        <legend>Pain &amp; Symptoms</legend>
+    <!-- Pain & Symptoms Card -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Pain &amp; Symptoms</h3>
         <div class="form-row">
-            <label>Current Pain Rating (0–10)
-                <input type="range" name="pain_rating" min="0" max="10" value="0" oninput="this.nextElementSibling.textContent=this.value">
-                <span class="range-value">0</span>
+            <label>Current Pain Rating (0–10): <span class="range-value" id="pain-val">0</span>
+                <input type="range" name="pain_rating" min="0" max="10" value="0" oninput="document.getElementById('pain-val').textContent=this.value">
             </label>
             <label>Pain Area Today
                 <input type="text" name="pain_area" placeholder="e.g. lower back, knee">
             </label>
         </div>
-        <label>Pain Trend
+        <label style="margin-top: 1rem;">Pain Trend
             <select name="pain_trend">
                 <option value="better">Better</option>
                 <option value="same" selected>Same</option>
                 <option value="worse">Worse</option>
             </select>
         </label>
-    </fieldset>
+    </div>
 
-    <fieldset>
-        <legend>Context</legend>
+    <!-- Context Card -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-white); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Context</h3>
         <div class="form-row">
             <label>Trained yesterday?
                 <select name="trained_yesterday">
@@ -73,10 +75,12 @@
                 </select>
             </label>
         </div>
-    </fieldset>
+    </div>
 
-    <button type="submit" class="btn btn-primary btn-block">Submit Check-in</button>
+    <button type="submit" class="btn btn-primary btn-block" style="padding: 1rem;">Submit Check-in</button>
 </form>
 
-<a href="{{ url_for('web.results') }}" class="btn btn-secondary">Back to Results</a>
+<div style="margin-top: 1rem; text-align: center;">
+    <a href="{{ url_for('web.results') }}" class="btn btn-secondary btn-block">Back to Results</a>
+</div>
 {% endblock %}
